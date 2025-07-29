@@ -2877,10 +2877,10 @@ public:
             xSpdLimit = carrot_man.getXSpdLimit();
         }
 
-        // 从lateralPlan获取cruiseTarget
-        if (sm.alive("lateralPlan")) {
-            const auto lat_plan = sm["lateralPlan"].getLateralPlan();
-            cruiseTarget = lat_plan.getCruiseTarget();
+        // 从longitudinalPlan获取cruiseTarget
+        if (sm.alive("longitudinalPlan")) {
+            const auto lp = sm["longitudinalPlan"].getLongitudinalPlan();
+            cruiseTarget = lp.getCruiseTarget();
         }
 
         // 格式化速度信息字符串
