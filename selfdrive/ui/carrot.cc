@@ -2858,7 +2858,42 @@ public:
 
         // bottom_left
         QString gitBranch = QString::fromStdString(params.get("GitBranch"));
-        sprintf(bottom_left, "%s", gitBranch.toStdString().c_str());
+
+                // 获取速度相关数据
+        float v_ego_kph = car_state.getVEgo() * MS_TO_KPH;
+        float v_cruise = car_state.getVCruiseCluster();
+
+        // 获取其他速度数据
+        float apply_speed = 250.0;
+        int nRoadLimitSpeed = 30;
+        int xSpdLimit = 0;
+        float cruiseTarget = 0.0;
+
+        // 从carrot_man获取数据（如果可用）
+        if (sm.alive("carrotMan")) {
+            const auto carrot_man = sm["carrotMan"].getCarrotMan();
+            apply_speed = carrot_man.getDesiredSpeed();
+            nRoadLimitSpeed = carrot_man.getNRoadLimitSpeed();
+            xSpdLimit = carrot_man.getXSpdLimit();
+        }
+
+        // 从lateralPlan获取cruiseTarget
+        if (sm.alive("lateralPlan")) {
+            const auto lat_plan = sm["lateralPlan"].getLateralPlan();
+            cruiseTarget = lat_plan.getCruiseTarget();
+        }
+
+        // 格式化速度信息字符串
+        char speed_info[256];
+        sprintf(speed_info, "%s_%.0f_%.0f_%.0f_%d_%d_%.0f",
+                gitBranch.toStdString().c_str(),
+                v_ego_kph,
+                v_cruise,
+                apply_speed,
+                nRoadLimitSpeed,
+                xSpdLimit,
+                cruiseTarget);
+        sprintf(bottom_left, "%s", speed_info);
 
         // bottom_right
         Params params_memory = Params("/dev/shm/params");
