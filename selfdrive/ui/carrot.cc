@@ -888,6 +888,7 @@ public:
         if(!make_data(s)) return;
         NVGcolor color;
         for (int i = 0; i < std::size(lane_line_vertices); ++i) {
+<<<<<<< HEAD
           int alpha = (lane_line_probs[i] > 0.3) ? 220 : 0;
           if (i == 1) color = (left_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
           else if (i == 2) color = (right_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
@@ -896,6 +897,10 @@ public:
           if ((i == 1) && (left_lane_line%10 == 4)) {
             ui_draw_line(s, lane_line_vertices_for_double, &color, nullptr);
           }
+=======
+            color = nvgRGBAf(0.0, 0.0, 1.0, (lane_line_probs[i] > 0.3) ? 1.0 : 0.0);
+            ui_draw_line(s, lane_line_vertices[i], &color, nullptr);
+>>>>>>> PC-IMU
         }
         if(show_lane_info > 1) drawRoadEdge(s);
     }
@@ -1969,7 +1974,11 @@ public:
               int max_z = lane_lines[2].getZ().size();
               float z_offset = 0.0;
               foreach(const QString & pair, pairs) {
+<<<<<<< HEAD
                 QStringList xy = pair.split(",");  // 用","分隔x和y
+=======
+                QStringList xy = pair.split(",");  // ","로 x와 y 구분
+>>>>>>> PC-IMU
                 if (xy.size() == 3) {
                   //printf("coords = x: %.1f, y: %.1f, d:%.1f\n", xy[0].toFloat(), xy[1].toFloat(), xy[2].toFloat());
                   float x = xy[0].toFloat();
@@ -2040,6 +2049,7 @@ public:
                 }
             }
         }
+        makeDeviceInfo(s);
 	  }
     void drawRadarInfo(UIState* s) {
         char str[128];
@@ -2237,7 +2247,11 @@ public:
         const SubMaster& sm = *(s->sm);
 
         // draw gap info
+<<<<<<< HEAD
         char driving_mode_str[32] = "节能";
+=======
+        char driving_mode_str[32] = "燃效";
+>>>>>>> PC-IMU
         int driving_mode = myDrivingMode;// params.getInt("MyDrivingMode");
         NVGcolor mode_color = COLOR_GREEN_ALPHA(210);
         NVGcolor text_color = COLOR_WHITE;
@@ -2529,17 +2543,18 @@ public:
         memoryUsage = deviceState.getMemoryUsagePercent();
         const auto cpuTempC = deviceState.getCpuTempC();
         const auto cpuUsagePercent = deviceState.getCpuUsagePercent();
-        int   size = sizeof(cpuTempC) / sizeof(cpuTempC[0]);
-        if (size > 0) {
-            for (int i = 0; i < size; i++) {
+        cpuTemp = 0.0f;
+        if (cpuTempC.size() > 0) {
+            for (int i = 0; i < cpuTempC.size(); i++) {
                 cpuTemp += cpuTempC[i];
             }
-            cpuTemp /= static_cast<float>(size);
+            cpuTemp /= static_cast<float>(cpuTempC.size());
         }
-        size = sizeof(cpuUsagePercent) / sizeof(cpuUsagePercent[0]);
-        if (size > 0) {
+
+        cpuUsage = 0.0f;
+        if (cpuUsagePercent.size() > 0) {
             int cpu_size = 0;
-            for (cpu_size = 0; cpu_size < size; cpu_size++) {
+            for (cpu_size = 0; cpu_size < cpuUsagePercent.size(); cpu_size++) {
                 if (cpuUsagePercent[cpu_size] <= 0) break;
                 cpuUsage += cpuUsagePercent[cpu_size];
             }

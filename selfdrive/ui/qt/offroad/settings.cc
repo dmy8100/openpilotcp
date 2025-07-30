@@ -838,6 +838,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   startToggles->addItem(new CValueControl("NNFFLite", "NNFFLite", "Twilsonco's NNFF-Lite(Reboot required)", "../assets/offroad/icon_road.png", 0, 1, 1));
 
   speedToggles = new ListWidget(this);
+<<<<<<< HEAD
   speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", "弯道: 最低限速(30)", "接近弯道时降低速度。最低速度", "../assets/offroad/icon_road.png", 30, 200, 5));
   speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", "弯道: 自动控制比例(100%)", "", "../assets/offroad/icon_road.png", 50, 300, 1));
   speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", "弯道: 激进程度 (100%)", "", "../assets/offroad/icon_road.png", 50, 300, 1));
@@ -856,6 +857,26 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   speedToggles->addItem(new CValueControl("AutoTurnControlTurnEnd", "ATC: 转弯控制距离时间 (6)", "距离=速度*时间", "../assets/offroad/icon_road.png", 0, 30, 1));
   speedToggles->addItem(new CValueControl("AutoRoadSpeedAdjust", "自动道路限速调整 (50%)", "", "../assets/offroad/icon_road.png", -1, 100, 5));
   speedToggles->addItem(new CValueControl("AutoTurnMapChange", "ATC自动地图切换(0)", "", "../assets/offroad/icon_road.png", 0, 1, 1));
+=======
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", "CURVE: Lower limit speed(10)", "When you approach a curve, reduce your speed. Minimum speed", "../assets/offroad/icon_road.png", 10, 200, 5));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", "CURVE: Auto Control ratio(100%)", "", "../assets/offroad/icon_road.png", 50, 300, 1));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", "CURVE: Aggressiveness (100%)", "", "../assets/offroad/icon_road.png", 50, 300, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlEnd", "SpeedCameraDecelEnd(6s)", "Sets the deceleration completion point. A larger value completes deceleration farther away from the camera.", "../assets/offroad/icon_road.png", 3, 20, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlMode", "NaviSpeedControlMode(2)", "0:No slowdown, 1: speed camera, 2: + accident prevention bump, 3: + mobile camera", "../assets/offroad/icon_road.png", 0, 3, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedDecelRate", "SpeedCameraDecelRatex0.01m/s^2(80)", "Lower number, slows down from a greater distance", "../assets/offroad/icon_road.png", 10, 200, 10));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedSafetyFactor", "SpeedCameraSafetyFactor(105%)", "", "../assets/offroad/icon_road.png", 80, 120, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpTime", "SpeedBumpTimeDistance(1s)", "", "../assets/offroad/icon_road.png", 1, 50, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpSpeed", "SpeedBumpSpeed(35Km/h)", "", "../assets/offroad/icon_road.png", 10, 100, 5));
+  speedToggles->addItem(new CValueControl("AutoRoadSpeedLimitOffset", "RoadSpeedLimitOffset(-1)", "-1:NotUsed,RoadLimitSpeed+Offset", "../assets/offroad/icon_road.png", -1, 100, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviCountDownMode", "NaviCountDown mode(2)", "0: off, 1:tbt+camera, 2:tbt+camera+bump", "../assets/offroad/icon_road.png", 0, 2, 1));
+  speedToggles->addItem(new CValueControl("TurnSpeedControlMode", "Turn Speed control mode(1)", "0: off, 1:vision, 2:vision+route, 3: route", "../assets/offroad/icon_road.png", 0, 3, 1));
+  speedToggles->addItem(new CValueControl("MapTurnSpeedFactor", "Map TurnSpeed Factor(100)", "", "../assets/offroad/icon_map.png", 50, 300, 5));
+  speedToggles->addItem(new CValueControl("AutoTurnControl", "ATC: Auto turn control(0)", "0:None, 1: lane change, 2: lane change + speed, 3: speed", "../assets/offroad/icon_road.png", 0, 3, 1));
+  speedToggles->addItem(new CValueControl("AutoTurnControlSpeedTurn", "ATC: Turn Speed (20)", "0:None, turn speed", "../assets/offroad/icon_road.png", 0, 100, 5));
+  speedToggles->addItem(new CValueControl("AutoTurnControlTurnEnd", "ATC: Turn CtrlDistTime (6)", "dist=speed*time", "../assets/offroad/icon_road.png", 0, 30, 1));
+  speedToggles->addItem(new CValueControl("AutoRoadSpeedAdjust", "Auto Roadlimit Speed adjust (50%)", "", "../assets/offroad/icon_road.png", -1, 100, 5));
+  speedToggles->addItem(new CValueControl("AutoTurnMapChange", "ATC Auto Map Change(0)", "", "../assets/offroad/icon_road.png", 0, 1, 1));
+>>>>>>> PC-IMU
 
   toggles_layout->addWidget(cruiseToggles);
   toggles_layout->addWidget(latLongToggles);

@@ -64,14 +64,14 @@ class SelfdriveD:
     self.gps_location_service = get_gps_location_service(self.params)
     self.gps_packets = [self.gps_location_service]
     self.sensor_packets = ["accelerometer", "gyroscope"]
-    self.camera_packets = ["roadCameraState", "driverCameraState", "wideRoadCameraState"]
+    self.camera_packets = ["roadCameraState", "wideRoadCameraState"]
 
     self.disable_dm = self.params.get_int("DisableDM")
 
     # TODO: de-couple selfdrived with card/conflate on carState without introducing controls mismatches
     self.car_state_sock = messaging.sub_sock('carState', timeout=20)
 
-    ignore = self.sensor_packets + self.gps_packets + ['alertDebug']
+    ignore = self.sensor_packets + self.gps_packets + ['alertDebug', "driverCameraState"]
     if SIMULATION:
       ignore += ['driverCameraState', 'managerState']
     elif self.disable_dm > 0:
