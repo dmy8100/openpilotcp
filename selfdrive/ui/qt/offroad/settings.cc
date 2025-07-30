@@ -838,7 +838,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   startToggles->addItem(new CValueControl("NNFFLite", "NNFFLite", "Twilsonco's NNFF-Lite(Reboot required)", "../assets/offroad/icon_road.png", 0, 1, 1));
 
   speedToggles = new ListWidget(this);
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", "弯道: 最低限速(30)", "接近弯道时降低速度。最低速度", "../assets/offroad/icon_road.png", 30, 200, 5));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", "弯道: 最低限速(30)", "接近弯道时降低速度。最低速度", "../assets/offroad/icon_road.png", 10, 200, 5));
   speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", "弯道: 自动控制比例(100%)", "", "../assets/offroad/icon_road.png", 50, 300, 1));
   speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", "弯道: 激进程度 (100%)", "", "../assets/offroad/icon_road.png", 50, 300, 1));
   speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlEnd", "测速摄像头减速结束(6秒)", "设置减速完成点。数值越大，距离摄像头越远完成减速。", "../assets/offroad/icon_road.png", 3, 20, 1));
