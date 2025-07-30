@@ -145,9 +145,11 @@ class HyundaiExtFlags(IntFlag):
   HAS_SCC14 = 2
   NAVI_CLUSTER = 2 ** 2
   #SCC_BUS2 = 2 ** 3
+  HAS_ACAN = 2 ** 3
   HAS_LFAHDA = 2 ** 4
   HAS_LFA_BUTTON = 2 ** 5
   CANFD_GEARS_NONE = 2 ** 6
+  RADAR_GROUP1 = 2 ** 7  # 0x210 radar group 1, 0x3A5 radar group 2
   #ACAN_PANDA = 2 ** 7
   BSM_IN_ADAS = 2 ** 8
   CANFD_TPMS = 2 ** 9
@@ -187,7 +189,7 @@ class HyundaiPlatformConfig(PlatformConfig):
 
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd"})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd", Bus.radar: 'hyundai_canfd_radar_generated'})
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD
@@ -309,6 +311,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
     CarSpecs(mass=1425, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.HYBRID | HyundaiFlags.ALT_LIMITS,
+  )
+  HYUNDAI_KONA_HEV_2ND_GEN = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Hyundai Kona Hybrid 2024", car_parts=CarParts.common([CarHarness.hyundai_l]))],
+    CarSpecs(mass=1590, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
+    flags=HyundaiFlags.HYBRID,
   )
   HYUNDAI_NEXO_1ST_GEN = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Nexo 2021", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
