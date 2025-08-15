@@ -677,7 +677,7 @@ class CarrotMan:
   def make_tmux_data(self):
     try:
       subprocess.run("rm /data/media/tmux.log; tmux capture-pane -pq -S-1000 > /data/media/tmux.log", shell=True, capture_output=True, text=False)
-      subprocess.run("/data/openpilot/selfdrive/apilot.py", shell=True, capture_output=True, text=False)
+      subprocess.run("/home/my/openpilot/selfdrive/apilot.py", shell=True, capture_output=True, text=False)
     except Exception as e:
       print(f"TMUX creation error: {e}")
       return
@@ -729,7 +729,7 @@ class CarrotMan:
       if self.show_panda_debug:
         self.show_panda_debug = False
         try:
-          subprocess.run("/data/openpilot/selfdrive/debug/debug_console_carrot.py", shell=True)
+          subprocess.run("/home/my/openpilot/selfdrive/debug/debug_console_carrot.py", shell=True)
         except Exception as e:
           print(f"debug_console error: {e}")
           time.sleep(2)

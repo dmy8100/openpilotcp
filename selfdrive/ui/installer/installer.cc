@@ -28,9 +28,9 @@ const std::string BRANCH_STR = get_str(BRANCH "?                                
 #define GIT_SSH_URL "git@github.com:commaai/openpilot.git"
 #define CONTINUE_PATH "/data/continue.sh"
 
-const QString CACHE_PATH = "/data/openpilot.cache";
+const QString CACHE_PATH = "/home/my/openpilot.cache";
 
-#define INSTALL_PATH "/data/openpilot"
+#define INSTALL_PATH "/home/my/openpilot"
 #define TMP_INSTALL_PATH "/data/tmppilot"
 
 extern const uint8_t str_continue[] asm("_binary_selfdrive_ui_installer_continue_openpilot_sh_start");

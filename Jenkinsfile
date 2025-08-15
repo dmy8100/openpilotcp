@@ -159,8 +159,8 @@ def step(String name, String cmd, Map args = [:]) {
 node {
   env.CI = "1"
   env.PYTHONWARNINGS = "error"
-  env.TEST_DIR = "/data/openpilot"
-  env.SOURCE_DIR = "/data/openpilot_source/"
+  env.TEST_DIR = "/home/my/openpilot"
+  env.SOURCE_DIR = "/home/my/openpilot_source/"
   setupCredentials()
 
   env.GIT_BRANCH = checkout(scm).GIT_BRANCH
