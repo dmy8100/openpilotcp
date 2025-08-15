@@ -347,24 +347,29 @@ class VCruiseCarrot:
     self.enabled_last = CC.enabled
 
   def initialize_v_cruise(self, CS, experimental_mode: bool) -> None:
-    return
-    # initializing is handled by the PCM
-    if self.CP.pcmCruise and self.speed_from_pcm == 1:
-      return
+      # 如果是PCM巡航且使用PCM速度，则返回（由PCM处理初始化）
+      if self.CP.pcmCruise and self.speed_from_pcm == 1:
+          return
 
-    initial = V_CRUISE_INITIAL_EXPERIMENTAL_MODE if experimental_mode else CS.vEgoCluster * CV.MS_TO_KPH
+      # 检查是否有resume按钮事件
+      resume_pressed = any(b.type == ButtonType.resumeCruise for b in CS.buttonEvents)
+    
+      # 如果检测到resume按钮且巡航已初始化，则恢复上次的巡航速度
+      if resume_pressed and self.v_cruise_initialized:
+          # 优先恢复刹车时保存的速度（如果有），否则恢复上次巡航速度
+          self.v_cruise_kph = max(self._v_cruise_kph_at_brake, self.v_cruise_kph_last) \
+                            if self._v_cruise_kph_at_brake > 0 else self.v_cruise_kph_last
+          self._add_log(f"{self.v_cruise_kph} Cruise resume (resume button)")
+      else:
+          # 否则根据当前速度初始化巡航
+          initial = V_CRUISE_INITIAL_EXPERIMENTAL_MODE if experimental_mode else \
+                    max(CS.vEgoCluster * CV.MS_TO_KPH, V_CRUISE_MIN)
+          self.v_cruise_kph = int(round(np.clip(initial, V_CRUISE_MIN, V_CRUISE_MAX)))
+          self._add_log(f"{self.v_cruise_kph} Cruise set (initial)")
 
-    v_ego_kph = int(round(np.clip(CS.vEgoCluster * CV.MS_TO_KPH, initial, V_CRUISE_MAX)))
-    print(CS.buttonEvents)
-    if any(b.type in (ButtonType.accelCruise, ButtonType.resumeCruise) for b in CS.buttonEvents): # and self.v_cruise_initialized:
-      self.v_cruise_kph = max(self._v_cruise_kph_at_brake, v_ego_kph) if self._v_cruise_kph_at_brake > 0 else self.v_cruise_kph_last
-      self._add_log(f"{self.v_cruise_kph},{self._v_cruise_kph_at_brake} Cruise resume")
-    else:
-      self.v_cruise_kph = v_ego_kph
-      self._add_log(f"{self.v_cruise_kph} Cruise Set")
-
-    self.v_cruise_kph = np.clip(self.v_cruise_kph, self._cruise_speed_min, self._cruise_speed_max)
-    self.v_cruise_cluster_kph = self.v_cruise_kph
+      # 确保速度在合法范围内
+      self.v_cruise_kph = np.clip(self.v_cruise_kph, self._cruise_speed_min, self._cruise_speed_max)
+      self.v_cruise_cluster_kph = self.v_cruise_kph
 
   def _prepare_buttons(self, CS, v_cruise_kph):
     button_kph = v_cruise_kph
