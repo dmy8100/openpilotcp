@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cd /data/openpilot
+cd/home/my/openpilot
 exec ./launch_openpilot.sh

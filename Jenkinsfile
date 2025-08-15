@@ -59,8 +59,8 @@ if [ -f /TICI ]; then
     echo "3-0:1.0" | sudo tee /sys/bus/usb/drivers/hub/bind
   fi
 fi
-if [ -f /data/openpilot/launch_env.sh ]; then
-  source /data/openpilot/launch_env.sh
+if [ -f/home/my/openpilot/launch_env.sh ]; then
+  source/home/my/openpilot/launch_env.sh
 fi
 
 ln -snf ${env.TEST_DIR} /data/pythonpath

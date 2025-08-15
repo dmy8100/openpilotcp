@@ -215,7 +215,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   QObject::connect(init_btn, &QPushButton::clicked, [&]() {
     if (ConfirmationDialog::confirm(tr("Git拉取并重启？"), tr("是"), this)) {
       QString cmd =
-        "bash -c 'cd /data/openpilot && "
+        "bash -c 'cd/home/my/openpilot && "
         "git fetch && "
         "if git status -uno | grep -q \"Your branch is behind\"; then "
         "git pull && reboot; "
