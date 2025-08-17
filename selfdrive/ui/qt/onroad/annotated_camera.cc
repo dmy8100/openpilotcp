@@ -24,7 +24,7 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget *par
 
   experimental_btn = new ExperimentalButton(this);
   main_layout->addWidget(experimental_btn, 0, Qt::AlignTop | Qt::AlignRight);
-  
+
   record_timer = std::make_shared<QTimer>();
 	QObject::connect(record_timer.get(), &QTimer::timeout, [=]() {
     if(recorder) {
@@ -35,7 +35,7 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget *par
 
 	recorder = new ScreenRecoder(this);
 	main_layout->addWidget(recorder, 0, Qt::AlignBottom | Qt::AlignRight);
-  
+
 }
 
 void AnnotatedCameraWidget::updateState(const UIState &s) {
@@ -94,7 +94,7 @@ mat4 AnnotatedCameraWidget::calcFrameMatrix() {
    // Compute the calibration transformation matrix
   const auto calib_transform = intrinsic_matrix * calibration;
 
-  float zoom = wide_cam ? 2.0 : 1.1;
+  float zoom = wide_cam ? 1.1 : 1.1;
   Eigen::Vector3f inf(1000., 0., 0.);
   auto Kep = calib_transform * inf;
 
@@ -171,13 +171,13 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
     bool has_wide_cam = available_streams.count(VISION_STREAM_WIDE_ROAD);
     if (has_wide_cam) {
       float v_ego = sm["carState"].getCarState().getVEgo();
-      if ((v_ego < 10) || available_streams.size() == 1) {
+      if ((v_ego < 7) || available_streams.size() == 1) {
         wide_cam_requested = true;
-      } else if (v_ego > 15) {
+      } else if (v_ego > 12) {
         wide_cam_requested = false;
       }
       //wide_cam_requested = wide_cam_requested && sm["selfdriveState"].getSelfdriveState().getExperimentalMode();
-      wide_cam_requested = wide_cam_requested && s->scene.carrot_experimental_mode;
+      //wide_cam_requested = wide_cam_requested && s->scene.carrot_experimental_mode;
     }
     painter.beginNativePainting();
     CameraWidget::setStreamType(wide_cam_requested ? VISION_STREAM_WIDE_ROAD : VISION_STREAM_ROAD);
@@ -192,7 +192,7 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
   model.draw(painter, rect());
   painter.beginNativePainting();
   try {
-      ui_draw(s, &model, width(), height());      
+      ui_draw(s, &model, width(), height());
   } catch (const std::exception &e) {
 	LOGE("ui_nvg_draw failed: %s", e.what());
     print_stack_trace();

@@ -122,7 +122,7 @@ class SelfdriveD:
     self.recalibrating_seen = False
     self.state_machine = StateMachine()
     self.rk = Ratekeeper(100, print_delay_threshold=None)
-    
+
     self.atc_type_last = ""
 
 
@@ -391,7 +391,7 @@ class SelfdriveD:
         if self.distance_traveled < 1600:
           self.events.add(EventName.noGps)
       #if gps_ok:
-      #  self.distance_traveled = 0
+        #self.distance_traveled = 0
       self.distance_traveled += abs(CS.vEgo) * DT_CTRL
 
       if self.sm['modelV2'].frameDropPerc > 20:
