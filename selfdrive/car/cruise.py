@@ -486,23 +486,24 @@ class VCruiseCarrot:
         self._add_log(f"Cruise Cancel state RESET {button_type}")
         self._cruise_cancel_state = False
 
+    #按＋
     if not long_pressed:
       if button_type == ButtonType.accelCruise:
         self._lat_enabled = True
         self._pause_auto_speed_up = False
         if self._soft_hold_active > 0:
           self._soft_hold_active = 0
-        elif self._cruise_ready or not CC.enabled or CS.cruiseState.standstill or self.carrot_cruise_active:
-          pass
+        #elif self._cruise_ready or not CC.enabled or CS.cruiseState.standstill or self.carrot_cruise_active:
+          #pass
         elif self._v_cruise_kph_at_brake > 0 and v_cruise_kph < self._v_cruise_kph_at_brake:
           v_cruise_kph = self._v_cruise_kph_at_brake
           self._v_cruise_kph_at_brake = 0
         elif self._cruise_button_mode == 0:
           v_cruise_kph = button_kph
-        else:
-          v_cruise_kph = self._v_cruise_desired(CS, v_cruise_kph)
-        self.carrot_cruise_active = False
-
+        #else:
+         # v_cruise_kph = self._v_cruise_desired(CS, v_cruise_kph)
+        #self.carrot_cruise_active = False
+      #按-
       elif button_type == ButtonType.decelCruise:
         self._lat_enabled = True
         self._pause_auto_speed_up = True
@@ -510,25 +511,25 @@ class VCruiseCarrot:
 
         if self._soft_hold_active > 0:
           self._cruise_control(-1, -1, "Cruise off,softhold mode (decelCruise)")
-        elif self._cruise_ready:
-          self._paddle_decel_active = True
-          pass
-        elif not CC.enabled:
-          v_cruise_kph = max(self.v_ego_kph_set, self._cruise_speed_min)
+        #elif self._cruise_ready:
+          #self._paddle_decel_active = True
+         # pass
+        #elif not CC.enabled:
+          #v_cruise_kph = max(self.v_ego_kph_set, self._cruise_speed_min)
         elif self.v_ego_kph_set > v_cruise_kph + 2 and self._cruise_button_mode in [2, 3]:
           v_cruise_kph = max(self.v_ego_kph_set, self._cruise_speed_min)
         elif self._cruise_button_mode in [0, 1]:
           v_cruise_kph = button_kph
-        elif self.v_ego_kph_set < 1.0:
-          self.carrot_cruise_active = True
-        elif self.v_ego_kph_set > self._cruise_speed_min and v_cruise_kph > self.v_ego_kph_set:
-          v_cruise_kph = self.v_ego_kph_set
+        #elif self.v_ego_kph_set < 1.0:
+          #self.carrot_cruise_active = True
+        #elif self.v_ego_kph_set > self._cruise_speed_min and v_cruise_kph > self.v_ego_kph_set:
+          #v_cruise_kph = self.v_ego_kph_set
         else:
           #self._cruise_control(-2, -1, "Cruise off (decelCruise)")
           self.carrot_cruise_active = True
           #self.events.append(EventName.audioPrompt)
         self._v_cruise_kph_at_brake = 0
-
+      #间距
       elif button_type == ButtonType.gapAdjustCruise:
         longitudinalPersonalityMax = self.params.get_int("LongitudinalPersonalityMax")
         if CS.pcmCruiseGap == 0:
@@ -549,6 +550,7 @@ class VCruiseCarrot:
           else:
             self._paddle_decel_active = True
         print("lfaButton")
+      #取消  
       elif button_type == ButtonType.cancel:
         self._paddle_decel_active = False
         #if self._cruise_cancel_state:
@@ -556,6 +558,7 @@ class VCruiseCarrot:
         #  self._add_log("Lateral " + "enabled" if self._lat_enabled else "disabled")
         self._cruise_cancel_state = True
         #self._v_cruise_kph_at_brake = 0
+    #长按    
     else:
       if button_type == ButtonType.accelCruise:
         v_cruise_kph = button_kph
