@@ -495,14 +495,14 @@ class VCruiseCarrot:
           self._soft_hold_active = 0
         #elif self._cruise_ready or not CC.enabled or CS.cruiseState.standstill or self.carrot_cruise_active:
           #pass
-        elif self._v_cruise_kph_at_brake > 0 and v_cruise_kph < self._v_cruise_kph_at_brake:
-          v_cruise_kph = self._v_cruise_kph_at_brake
+        #elif self._v_cruise_kph_at_brake > 0 and v_cruise_kph < self._v_cruise_kph_at_brake:
+          #v_cruise_kph = self._v_cruise_kph_at_brake
           self._v_cruise_kph_at_brake = 0
         elif self._cruise_button_mode == 0:
           v_cruise_kph = button_kph
-        #else:
-         # v_cruise_kph = self._v_cruise_desired(CS, v_cruise_kph)
-        #self.carrot_cruise_active = False
+        else:
+          v_cruise_kph = self._v_cruise_desired(CS, v_cruise_kph)
+        self.carrot_cruise_active = False
       #按-
       elif button_type == ButtonType.decelCruise:
         self._lat_enabled = True
