@@ -224,8 +224,8 @@ static inline void fill_rect(NVGcontext* vg, const Rect1& r, const NVGcolor* col
     if (stroke_width > 0) {
         nvgStrokeWidth(vg, stroke_width);
         if (stroke_color) nvgStrokeColor(vg, *stroke_color);
-		else nvgStrokeColor(vg, nvgRGB(0, 0, 0));
-        nvgStroke(vg);
+		else nvgStrokeColor(vg, nvgRGB(0, 0, 0));   
+        nvgStroke(vg);                         
     }
 }
 
@@ -720,7 +720,7 @@ public:
 #endif
             }
             else if (xState == 4) {     //XState.e2ePrepare
-				      ui_draw_text(s, x, disp_y, "E2E驾驶中", disp_size, COLOR_WHITE, BOLD);
+				      ui_draw_text(s, x, disp_y, "E2E주행중", disp_size, COLOR_WHITE, BOLD);
 			      }
             else if (xState == 0 || xState == 1 || xState == 2) {     //XState.lead
                 draw_dist = true;
@@ -839,12 +839,16 @@ private:
     float lane_line_probs[4];
     float road_edge_stds[2];
     QPolygonF lane_line_vertices[4];
+    QPolygonF lane_line_vertices_for_double;
     QPolygonF road_edge_vertices[2];
+    int  left_lane_line = 0;
+    int  right_lane_line = 0;
 
 protected:
     bool make_data(const UIState* s) {
         SubMaster& sm = *(s->sm);
         if (!sm.alive("modelV2")) return false;
+        if (!sm.alive("carState")) return false;
         const cereal::ModelDataV2::Reader& model = sm["modelV2"].getModelV2();
         const auto model_lane_lines = model.getLaneLines();
         const auto model_lane_line_probs = model.getLaneLineProbs();
@@ -852,6 +856,9 @@ protected:
         for (int i = 0; i < std::size(lane_line_vertices); i++) {
             lane_line_probs[i] = model_lane_line_probs[i];
             update_line_data(s, model_lane_lines[i], 0.025 * lane_line_probs[i], 0.0, 0.0, &lane_line_vertices[i], max_idx);
+            if(i == 1) {
+              update_line_data(s, model_lane_lines[i], 0.025 * lane_line_probs[i], 0.0, 0.0, &lane_line_vertices_for_double, max_idx, true, -0.3);
+            }
         }
 
         // roadedges
@@ -862,7 +869,8 @@ protected:
             road_edge_stds[i] = model_road_edge_stds[i];
             update_line_data(s, model_road_edges[i], 0.025, 0.0, 0.0, &road_edge_vertices[i], max_idx_road_edge);
         }
-
+        left_lane_line = sm["carState"].getCarState().getLeftLaneLine();
+        right_lane_line = sm["carState"].getCarState().getRightLaneLine();
         return true;
     }
     void drawRoadEdge(const UIState* s) {
@@ -880,8 +888,14 @@ public:
         if(!make_data(s)) return;
         NVGcolor color;
         for (int i = 0; i < std::size(lane_line_vertices); ++i) {
-            color = nvgRGBAf(0, 0, 1.0, (lane_line_probs[i] > 0.3) ? 1.0 : 0.0);
-            ui_draw_line(s, lane_line_vertices[i], &color, nullptr);
+          int alpha = (lane_line_probs[i] > 0.3) ? 220 : 0;
+          if (i == 1) color = (left_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
+          else if (i == 2) color = (right_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
+          else color = COLOR_WHITE_ALPHA(alpha);
+          ui_draw_line(s, lane_line_vertices[i], &color, nullptr);
+          if ((i == 1) && (left_lane_line%10 == 4)) {
+            ui_draw_line(s, lane_line_vertices_for_double, &color, nullptr);
+          }
         }
         if(show_lane_info > 1) drawRoadEdge(s);
     }
@@ -1045,10 +1059,10 @@ protected:
         active_carrot = 2;
         nGoPosDist = 500000;
         nGoPosTime = 4 * 60 * 60;
-        szSdiDescr = "儿童保护区(学校区域开始路段)";
+        szSdiDescr = "어린이 보호구역(스쿨존 시작 구간)";
         xTurnInfo = 1;
         xDistToTurn = 1000;
-        szPosRoadName = "九门川1街17号";
+        szPosRoadName = "구문천 1길 17";
 #endif
 
         //if (active_carrot <= 1) return;
@@ -1090,9 +1104,9 @@ protected:
             case 4: ui_draw_image(s, { bx - icon_size / 2, by - icon_size / 2, icon_size, icon_size }, "ic_lane_change_r", 1.0f); break;
             case 7: ui_draw_image(s, { bx - icon_size / 2, by - icon_size / 2, icon_size, icon_size }, "ic_turn_u", 1.0f); break;
             case 6: ui_draw_text(s, bx, by + 20, "TG", 35, COLOR_WHITE, BOLD); break;
-            case 8: ui_draw_text(s, bx, by + 20, "目的地", 35, COLOR_WHITE, BOLD); break;
+            case 8: ui_draw_text(s, bx, by + 20, "목적지", 35, COLOR_WHITE, BOLD); break;
             default:
-                sprintf(str, "减速:%d", xTurnInfo);
+                sprintf(str, "감속:%d", xTurnInfo);
                 ui_draw_text(s, bx, by + 20, str, 35, COLOR_WHITE, BOLD);
                 break;
             }
@@ -1121,7 +1135,7 @@ protected:
             int remaining_minutes = (int)nGoPosTime / 60;
             local->tm_min += remaining_minutes;
             mktime(local);
-            sprintf(str, "到达: %.1f分钟(%02d:%02d)", (float)nGoPosTime / 60., local->tm_hour, local->tm_min);
+            sprintf(str, "도착: %.1f분(%02d:%02d)", (float)nGoPosTime / 60., local->tm_hour, local->tm_min);
             ui_draw_text(s, tbt_x + 190, tbt_y + 80, str, 50, COLOR_WHITE, BOLD);
             sprintf(str, "%.1fkm", nGoPosDist / 1000.);
             ui_draw_text(s, tbt_x + 190 + 120, tbt_y + 130, str, 50, COLOR_WHITE, BOLD);
@@ -1137,7 +1151,7 @@ public:
             return -1;
         }
         const auto carrot_man = sm["carrotMan"].getCarrotMan();
-
+          
         active_carrot = carrot_man.getActiveCarrot();
 
         if (active_carrot > 1) {
@@ -1161,7 +1175,7 @@ public:
           szSdiDescr = QString::fromStdString(carrot_man.getSzSdiDescr());
           szPosRoadName = QString::fromStdString(carrot_man.getSzPosRoadName());
           szTBTMainText = QString::fromStdString(carrot_man.getSzTBTMainText());
-
+          
         }
         else {
           //xTurnInfo = -1;
@@ -1562,9 +1576,10 @@ protected:
         *pvd = left_points + right_points;
     }
 protected:
+    bool longActive = false;
     bool make_data(const UIState* s) {
-		SubMaster& sm = *(s->sm);
-		if (!sm.alive("modelV2") || !sm.alive("carState")) return false;
+		  SubMaster& sm = *(s->sm);
+		  if (!sm.alive("modelV2") || !sm.alive("carState")) return false;
         const cereal::ModelDataV2::Reader& model = sm["modelV2"].getModelV2();
         active_lane_line = sm["controlsState"].getControlsState().getActiveLaneLine();
         auto model_position = model.getPosition();
@@ -1573,23 +1588,23 @@ protected:
         }
         float max_distance = s->max_distance;
         max_distance -= 2.0;
-        int max_idx = 32;// show path test...  get_path_length_idx(model_position, max_distance);
+        int max_idx = get_path_length_idx(model_position, max_distance);
 
         auto selfdrive_state = sm["selfdriveState"].getSelfdriveState();
-        bool longActive = selfdrive_state.getEnabled();
+        longActive = selfdrive_state.getEnabled();
         if (longActive == false) {
             show_path_mode = show_path_mode_cruise_off;
             show_path_color = show_path_color_cruise_off;
         }
         else {
-			if (active_lane_line) {
-				show_path_mode = show_path_mode_lane;
-				show_path_color = show_path_color_lane;
-			}
-            else {
-                show_path_mode = show_path_mode_normal;
-                show_path_color = show_path_color_normal;
-            }
+			    if (active_lane_line) {
+				    show_path_mode = show_path_mode_lane;
+				    show_path_color = show_path_color_lane;
+			    }
+          else {
+              show_path_mode = show_path_mode_normal;
+              show_path_color = show_path_color_normal;
+          }
         }
 
         if (show_path_mode == 0) {
@@ -1634,6 +1649,25 @@ public:
         };
 
         bool brake_valid = car_state.getBrakeLights();
+        const auto radar_state = sm["radarState"].getRadarState();
+        auto lead_one = radar_state.getLeadOne();
+        auto lp = sm["longitudinalPlan"].getLongitudinalPlan();
+        //float desired_distance = lp.getDesiredDistance();
+        float accel = lp.getAccels()[0];
+
+        if (show_path_color >= 20) {
+          if (longActive) {
+            show_path_color = 13;// green
+            if (lead_one.getStatus()) {
+              if (abs(accel) < 0.5f) show_path_color = 12; // yellow
+              else if (accel >= 0.5f) show_path_color = 11; // amber
+              else show_path_color = 10; // red
+            }
+          }
+          else {
+            show_path_color = 19; // black
+          }
+        }
 
         if (show_path_mode == 0) {
             ui_draw_line(s, track_vertices, &colors[show_path_color % 10], nullptr,
@@ -1935,7 +1969,7 @@ public:
               int max_z = lane_lines[2].getZ().size();
               float z_offset = 0.0;
               foreach(const QString & pair, pairs) {
-                QStringList xy = pair.split(",");  // ","로 x와 y 구분
+                QStringList xy = pair.split(",");  // ","로 x와 y 구분                
                 if (xy.size() == 3) {
                   //printf("coords = x: %.1f, y: %.1f, d:%.1f\n", xy[0].toFloat(), xy[1].toFloat(), xy[2].toFloat());
                   float x = xy[0].toFloat();
@@ -2014,17 +2048,20 @@ public:
             int wStr = 40;
             for (auto const& vrd : lead_vertices_side) {
                 auto [rx, ry, rd, rv, ry_rel, v_lat, radar] = vrd;
+                float v_abs = sqrtf(rv * rv + v_lat * v_lat);
+                float v_sum = (rv >= 0)? v_abs : -v_abs;
 
-                if (rv < -1.0 || rv > 1.0) {
-                    sprintf(str, "%.0f", (s->scene.is_metric)? rv * MS_TO_KPH : rv * MS_TO_MPH);
+                if (v_sum < -1.0 || v_sum > 1.0) {
+                    sprintf(str, "%.0f", (s->scene.is_metric)? v_sum * MS_TO_KPH : v_sum * MS_TO_MPH);
                     wStr = 35 * (strlen(str) + 0);
-                    ui_fill_rect(s->vg, { (int)(rx - wStr / 2), (int)(ry - 35), wStr, 42 }, (!radar) ? COLOR_BLUE : (rv > 0.) ? COLOR_GREEN : COLOR_RED, 15);
+                    ui_fill_rect(s->vg, { (int)(rx - wStr / 2), (int)(ry - 35), wStr, 42 }, (!radar) ? COLOR_BLUE : (v_sum > 0.) ? COLOR_GREEN : COLOR_RED, 15);
                     ui_draw_text(s, rx, ry, str, 40, COLOR_WHITE, BOLD);
                     if (show_radar_info >= 2) {
                         sprintf(str, "%.1f", ry_rel);
                         ui_draw_text(s, rx, ry - 40, str, 30, COLOR_WHITE, BOLD);
-                        //sprintf(str, "%.2f", v_lat);
-                        //ui_draw_text(s, rx, ry + 30, str, 30, COLOR_WHITE, BOLD);
+                        sprintf(str, "%.2f", v_lat);
+                        //sprintf(str, "%.2f", rd);
+                        ui_draw_text(s, rx, ry + 30, str, 30, COLOR_WHITE, BOLD);
                     }
                 }
 #if 0
@@ -2119,7 +2156,7 @@ public:
     void drawHud(UIState* s) {
         int show_device_state = params.getInt("ShowDeviceState");
         blink_timer = (blink_timer + 1) % 16;
-        disp_timer = (disp_timer + 1) % 64;
+        disp_timer = (disp_timer + 1) % 64; 
         nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM);
 
         int x = 140;// 120;
@@ -2213,7 +2250,7 @@ public:
         }
         int dx = bx - 50;
         int dy = by + 175;
-        ui_fill_rect(s->vg, { dx - 55, dy - 38, 110, 48 }, mode_color, 15, 2);
+        ui_fill_rect(s->vg, { dx - 55, dy - 40, 110, 48 }, mode_color, 15, 2);
         ui_draw_text(s, dx, dy, driving_mode_str, 32, text_color, BOLD);
         if (strcmp(driving_mode_str, driving_mode_str_last)) ui_draw_text_a(s, dx, dy, driving_mode_str, 30, COLOR_WHITE, BOLD);
         strcpy(driving_mode_str_last, driving_mode_str);
@@ -2370,9 +2407,9 @@ public:
             }
             if (show_datetime == 1 || show_datetime == 3) {
                 //strftime(str, sizeof(str), "%m-%d-%a", local);
-                const char* weekdays_ko[] = { "日", "一", "二", "三", "四", "五", "六" };
-                strftime(str, sizeof(str), "%m-%d", local); // 只获取日期
-                int weekday_index = local->tm_wday; // tm_wday: 0=日, 1=一, ..., 6=六
+                const char* weekdays_ko[] = { "일", "월", "화", "수", "목", "금", "토" };
+                strftime(str, sizeof(str), "%m-%d", local); // 날짜만 가져옴
+                int weekday_index = local->tm_wday; // tm_wday: 0=일, 1=월, ..., 6=토
                 snprintf(str + strlen(str), sizeof(str) - strlen(str), "(%s)", weekdays_ko[weekday_index]);
 
                 ui_draw_text(s, x, y + 70, str, 60, COLOR_WHITE, BOLD, 3.0f, 8.0f);
@@ -2668,7 +2705,7 @@ void ui_draw(UIState *s, ModelRenderer* model_renderer, int w, int h) {
   int path_x = drawPathEnd.getPathX();
   int path_y = drawPathEnd.getPathY();
   drawDesire.draw(s, path_x, path_y - 135);
-
+  
 
   drawPlot.draw(s);
 

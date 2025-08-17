@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-DEST=tici:/home/my/openpilot/selfdrive/debug/profiling/perfetto
+DEST=tici:/data/openpilot/selfdrive/debug/profiling/perfetto
 
-scp tici:/home/my/openpilot/selfdrive/debug/profiling/perfetto/trace_* .
+scp tici:/data/openpilot/selfdrive/debug/profiling/perfetto/trace_* .

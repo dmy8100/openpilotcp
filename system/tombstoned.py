@@ -84,7 +84,7 @@ def report_tombstone_apport(fn):
 
       if "ExecutablePath" in line:
         path = line.strip().split(': ')[-1]
-        path = path.replace('/home/my/openpilot/', '')
+        path = path.replace('/data/openpilot/', '')
         message += path
       elif "Signal" in line:
         message += " - " + line.strip()

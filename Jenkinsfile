@@ -59,8 +59,8 @@ if [ -f /TICI ]; then
     echo "3-0:1.0" | sudo tee /sys/bus/usb/drivers/hub/bind
   fi
 fi
-if [ -f/home/my/openpilot/launch_env.sh ]; then
-  source/home/my/openpilot/launch_env.sh
+if [ -f /data/openpilot/launch_env.sh ]; then
+  source /data/openpilot/launch_env.sh
 fi
 
 ln -snf ${env.TEST_DIR} /data/pythonpath
@@ -159,8 +159,8 @@ def step(String name, String cmd, Map args = [:]) {
 node {
   env.CI = "1"
   env.PYTHONWARNINGS = "error"
-  env.TEST_DIR = "/home/my/openpilot"
-  env.SOURCE_DIR = "/home/my/openpilot_source/"
+  env.TEST_DIR = "/data/openpilot"
+  env.SOURCE_DIR = "/data/openpilot_source/"
   setupCredentials()
 
   env.GIT_BRANCH = checkout(scm).GIT_BRANCH

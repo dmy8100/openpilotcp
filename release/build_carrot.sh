@@ -1,6 +1,6 @@
 #!/usr/bin/bash -e
 
-BUILD_DIR=/home/my/openpilot
+BUILD_DIR=/data/openpilot
 cd $BUILD_DIR
 git init
 #git remote add origin https://github.com/ajouatom/openpilot

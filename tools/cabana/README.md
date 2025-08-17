@@ -61,7 +61,7 @@ cabana "a2a0ccea32023010|2023-07-27--13-01-19" --dcam --ecam
 [SSH into your device](https://github.com/commaai/openpilot/wiki/SSH) and start the bridge with the following command:
 
 ```shell
-cd/home/my/openpilot/cereal/messaging/
+cd /data/openpilot/cereal/messaging/
 ./bridge &
 ```
 
