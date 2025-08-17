@@ -224,8 +224,8 @@ static inline void fill_rect(NVGcontext* vg, const Rect1& r, const NVGcolor* col
     if (stroke_width > 0) {
         nvgStrokeWidth(vg, stroke_width);
         if (stroke_color) nvgStrokeColor(vg, *stroke_color);
-		else nvgStrokeColor(vg, nvgRGB(0, 0, 0));
-        nvgStroke(vg);
+		else nvgStrokeColor(vg, nvgRGB(0, 0, 0));   
+        nvgStroke(vg);                         
     }
 }
 
@@ -316,8 +316,8 @@ protected:
 
     }
     Params  params;
-    std::deque<float> minDeque[3];  // 维护最小值的双端队列
-    std::deque<float> maxDeque[3];  // 维护最大值的双端队列
+    std::deque<float> minDeque[3];  // 최소값을 유지하는 덱
+    std::deque<float> maxDeque[3];  // 최대값을 유지하는 덱
     void	makePlotData(const UIState* s, float data[], char* title) {
 
         SubMaster& sm = *(s->sm);
@@ -412,11 +412,11 @@ protected:
     }
 
     void updatePlotQueue(float plot_data[3]) {
-        // 更新plotIndex
+        // plotIndex 업데이트
         plotIndex = (plotIndex + 1) % PLOT_MAX;
 
         for (int i = 0; i < 3; i++) {
-            // 如果旧值是双端队列的最小值/最大值，则移除
+            // 오래된 값이 덱의 최솟값/최댓값에 해당하면 제거
             if (plotSize == PLOT_MAX) {
                 if (!minDeque[i].empty() && minDeque[i].front() == plotQueue[i][plotIndex]) {
                     minDeque[i].pop_front();
@@ -426,28 +426,28 @@ protected:
                 }
             }
 
-            // 将新值添加到队列
+            // 새 값을 큐에 추가
             plotQueue[i][plotIndex] = plot_data[i];
 
-            // 更新minDeque
+            // minDeque 업데이트
             while (!minDeque[i].empty() && minDeque[i].back() > plot_data[i]) {
                 minDeque[i].pop_back();
             }
             minDeque[i].push_back(plot_data[i]);
 
-            // 更新maxDeque
+            // maxDeque 업데이트
             while (!maxDeque[i].empty() && maxDeque[i].back() < plot_data[i]) {
                 maxDeque[i].pop_back();
             }
             maxDeque[i].push_back(plot_data[i]);
         }
 
-        // 增加队列大小
+        // 큐 크기 증가
         if (plotSize < PLOT_MAX) {
             plotSize++;
         }
 
-        // 计算整体最小值和最大值
+        // 전체 최소값 및 최대값 계산
         plotMin = std::numeric_limits<double>::max();
         plotMax = std::numeric_limits<double>::lowest();
         for (int i = 0; i < 3; i++) {
@@ -455,7 +455,7 @@ protected:
             plotMax = std::max(plotMax, maxDeque[i].front());
         }
 
-        // 限制plotMin和plotMax范围
+        // plotMin 및 plotMax 범위 제한
         if (plotMin > -2.0) plotMin = -2.0;
         if (plotMax < 2.0) plotMax = 2.0;
     }
@@ -720,7 +720,7 @@ public:
 #endif
             }
             else if (xState == 4) {     //XState.e2ePrepare
-				      ui_draw_text(s, x, disp_y, "E2E驾驶中", disp_size, COLOR_WHITE, BOLD);
+				      ui_draw_text(s, x, disp_y, "E2E주행중", disp_size, COLOR_WHITE, BOLD);
 			      }
             else if (xState == 0 || xState == 1 || xState == 2) {     //XState.lead
                 draw_dist = true;
@@ -889,9 +889,9 @@ public:
         NVGcolor color;
         for (int i = 0; i < std::size(lane_line_vertices); ++i) {
           int alpha = (lane_line_probs[i] > 0.3) ? 220 : 0;
-          if (i == 1) color = (left_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : nvgRGBA(0, 0, 255, alpha); // 白色改为蓝色
-          else if (i == 2) color = (right_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : nvgRGBA(0, 0, 255, alpha); // 白色改为蓝色
-          else color = nvgRGBA(0, 0, 255, alpha); // 白色改为蓝色
+          if (i == 1) color = (left_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
+          else if (i == 2) color = (right_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
+          else color = COLOR_WHITE_ALPHA(alpha);
           ui_draw_line(s, lane_line_vertices[i], &color, nullptr);
           if ((i == 1) && (left_lane_line%10 == 4)) {
             ui_draw_line(s, lane_line_vertices_for_double, &color, nullptr);
@@ -1025,9 +1025,9 @@ protected:
                     else  sprintf(str, "%.1f km", xSpdDist / 1000.f);
                 }
                 else {
-                    // 1米 = 3.28084英尺计算
-                    if (xSpdDist < 1609) sprintf(str, "%d ft", (int)(xSpdDist * 3.28084)); // 小于1609m(1英里)时显示为英尺
-                    else sprintf(str, "%.1f mi", xSpdDist / 1609.34f); // 1609m以上时显示为英里
+                    // 1 미터 = 3.28084 피트로 계산
+                    if (xSpdDist < 1609) sprintf(str, "%d ft", (int)(xSpdDist * 3.28084)); // 1609m(1마일)보다 작으면 피트로 표시
+                    else sprintf(str, "%.1f mi", xSpdDist / 1609.34f); // 1609m 이상이면 마일로 표시
                 }
                 ui_draw_text(s, bx, by + 120 * scale, str, 40 * scale, COLOR_WHITE, BOLD);
             }
@@ -1059,10 +1059,10 @@ protected:
         active_carrot = 2;
         nGoPosDist = 500000;
         nGoPosTime = 4 * 60 * 60;
-        szSdiDescr = "儿童保护区(学校区域开始路段)";
+        szSdiDescr = "어린이 보호구역(스쿨존 시작 구간)";
         xTurnInfo = 1;
         xDistToTurn = 1000;
-        szPosRoadName = "九门川1街17号";
+        szPosRoadName = "구문천 1길 17";
 #endif
 
         //if (active_carrot <= 1) return;
@@ -1104,9 +1104,9 @@ protected:
             case 4: ui_draw_image(s, { bx - icon_size / 2, by - icon_size / 2, icon_size, icon_size }, "ic_lane_change_r", 1.0f); break;
             case 7: ui_draw_image(s, { bx - icon_size / 2, by - icon_size / 2, icon_size, icon_size }, "ic_turn_u", 1.0f); break;
             case 6: ui_draw_text(s, bx, by + 20, "TG", 35, COLOR_WHITE, BOLD); break;
-            case 8: ui_draw_text(s, bx, by + 20, "目的地", 35, COLOR_WHITE, BOLD); break;
+            case 8: ui_draw_text(s, bx, by + 20, "목적지", 35, COLOR_WHITE, BOLD); break;
             default:
-                sprintf(str, "减速:%d", xTurnInfo);
+                sprintf(str, "감속:%d", xTurnInfo);
                 ui_draw_text(s, bx, by + 20, str, 35, COLOR_WHITE, BOLD);
                 break;
             }
@@ -1116,7 +1116,7 @@ protected:
         }
         nvgTextAlign(s->vg, NVG_ALIGN_LEFT | NVG_ALIGN_BOTTOM);
         if (szSdiDescr.length() > 0) {
-            float bounds[4];  // 存储[xmin, ymin, xmax, ymax]的数组
+            float bounds[4];  // [xmin, ymin, xmax, ymax]를 저장하는 배열
             nvgFontSize(s->vg, 40);
             nvgTextBounds(s->vg, tbt_x + 200, tbt_y + 200, szSdiDescr.toStdString().c_str(), NULL, bounds);
             float text_width = bounds[2] - bounds[0];
@@ -1130,12 +1130,12 @@ protected:
         }
 
         if (nGoPosDist > 0 && nGoPosTime > 0) {
-            time_t now = time(NULL);  // 获取当前时间
+            time_t now = time(NULL);  // 현재 시간 얻기
             struct tm* local = localtime(&now);
             int remaining_minutes = (int)nGoPosTime / 60;
             local->tm_min += remaining_minutes;
             mktime(local);
-            sprintf(str, "到达: %.1f分钟(%02d:%02d)", (float)nGoPosTime / 60., local->tm_hour, local->tm_min);
+            sprintf(str, "도착: %.1f분(%02d:%02d)", (float)nGoPosTime / 60., local->tm_hour, local->tm_min);
             ui_draw_text(s, tbt_x + 190, tbt_y + 80, str, 50, COLOR_WHITE, BOLD);
             sprintf(str, "%.1fkm", nGoPosDist / 1000.);
             ui_draw_text(s, tbt_x + 190 + 120, tbt_y + 130, str, 50, COLOR_WHITE, BOLD);
@@ -1151,7 +1151,7 @@ public:
             return -1;
         }
         const auto carrot_man = sm["carrotMan"].getCarrotMan();
-
+          
         active_carrot = carrot_man.getActiveCarrot();
 
         if (active_carrot > 1) {
@@ -1175,7 +1175,7 @@ public:
           szSdiDescr = QString::fromStdString(carrot_man.getSzSdiDescr());
           szPosRoadName = QString::fromStdString(carrot_man.getSzPosRoadName());
           szTBTMainText = QString::fromStdString(carrot_man.getSzTBTMainText());
-
+          
         }
         else {
           //xTurnInfo = -1;
@@ -1318,7 +1318,7 @@ protected:
         auto model_position = model.getPosition();
         int max_idx_barrier_l = get_path_length_idx(model_position, 40.0);
         int max_idx_barrier_r = get_path_length_idx(model_position, 40.0);
-        update_line_data(s, model_position, 0, 1.2 - 0.05, 1.2 - 0.6, &lane_barrier_vertices[0], max_idx_barrier_l, false, -1.7); // 如果知道车道宽度就好了...
+        update_line_data(s, model_position, 0, 1.2 - 0.05, 1.2 - 0.6, &lane_barrier_vertices[0], max_idx_barrier_l, false, -1.7); // 차선폭을 알면 좋겠지만...
         update_line_data(s, model_position, 0, 1.2 - 0.05, 1.2 - 0.6, &lane_barrier_vertices[1], max_idx_barrier_r, false, 1.7);
         return true;
     }
@@ -1969,7 +1969,7 @@ public:
               int max_z = lane_lines[2].getZ().size();
               float z_offset = 0.0;
               foreach(const QString & pair, pairs) {
-                QStringList xy = pair.split(",");  // 用","分隔x和y
+                QStringList xy = pair.split(",");  // ","로 x와 y 구분                
                 if (xy.size() == 3) {
                   //printf("coords = x: %.1f, y: %.1f, d:%.1f\n", xy[0].toFloat(), xy[1].toFloat(), xy[2].toFloat());
                   float x = xy[0].toFloat();
@@ -2040,7 +2040,6 @@ public:
                 }
             }
         }
-        makeDeviceInfo(s);
 	  }
     void drawRadarInfo(UIState* s) {
         char str[128];
@@ -2157,7 +2156,7 @@ public:
     void drawHud(UIState* s) {
         int show_device_state = params.getInt("ShowDeviceState");
         blink_timer = (blink_timer + 1) % 16;
-        disp_timer = (disp_timer + 1) % 64;
+        disp_timer = (disp_timer + 1) % 64; 
         nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM);
 
         int x = 140;// 120;
@@ -2226,7 +2225,7 @@ public:
 
         if (apply_source.length()) {
             sprintf(apply_speed_str, "%d", (int)((s->scene.is_metric)?apply_speed:apply_speed * KM_TO_MILE + 0.5));
-            textColor = COLOR_OCHRE;    // 如果apply speed生效了...就改变颜色。
+            textColor = COLOR_OCHRE;    // apply speed가 작동되면... 색을 바꾸자.
             ui_draw_text(s, apply_x, apply_y, apply_speed_str, 50, textColor, BOLD, 1.0, 5.0, COLOR_BLACK, COLOR_BLACK);
             ui_draw_text(s, apply_x, apply_y - 50, apply_source.toStdString().c_str(), 30, textColor, BOLD, 1.0, 5.0, COLOR_BLACK, COLOR_BLACK);
         }
@@ -2238,7 +2237,7 @@ public:
         const SubMaster& sm = *(s->sm);
 
         // draw gap info
-        char driving_mode_str[32] = "节能";
+        char driving_mode_str[32] = "연비";
         int driving_mode = myDrivingMode;// params.getInt("MyDrivingMode");
         NVGcolor mode_color = COLOR_GREEN_ALPHA(210);
         NVGcolor text_color = COLOR_WHITE;
@@ -2390,7 +2389,7 @@ public:
     }
     void drawDateTime(const UIState* s) {
         char str[128];
-        // 时间显示
+        // 시간표시
         int show_datetime = params.getInt("ShowDateTime");
         if (show_datetime) {
             time_t now = time(nullptr);
@@ -2408,9 +2407,9 @@ public:
             }
             if (show_datetime == 1 || show_datetime == 3) {
                 //strftime(str, sizeof(str), "%m-%d-%a", local);
-                const char* weekdays_ko[] = { "日", "一", "二", "三", "四", "五", "六" };
-                strftime(str, sizeof(str), "%m-%d", local); // 只获取日期
-                int weekday_index = local->tm_wday; // tm_wday: 0=日, 1=一, ..., 6=六
+                const char* weekdays_ko[] = { "일", "월", "화", "수", "목", "금", "토" };
+                strftime(str, sizeof(str), "%m-%d", local); // 날짜만 가져옴
+                int weekday_index = local->tm_wday; // tm_wday: 0=일, 1=월, ..., 6=토
                 snprintf(str + strlen(str), sizeof(str) - strlen(str), "(%s)", weekdays_ko[weekday_index]);
 
                 ui_draw_text(s, x, y + 70, str, 60, COLOR_WHITE, BOLD, 3.0f, 8.0f);
@@ -2530,18 +2529,17 @@ public:
         memoryUsage = deviceState.getMemoryUsagePercent();
         const auto cpuTempC = deviceState.getCpuTempC();
         const auto cpuUsagePercent = deviceState.getCpuUsagePercent();
-        cpuTemp = 0.0f;
-        if (cpuTempC.size() > 0) {
-            for (int i = 0; i < cpuTempC.size(); i++) {
+        int   size = sizeof(cpuTempC) / sizeof(cpuTempC[0]);
+        if (size > 0) {
+            for (int i = 0; i < size; i++) {
                 cpuTemp += cpuTempC[i];
             }
-            cpuTemp /= static_cast<float>(cpuTempC.size());
+            cpuTemp /= static_cast<float>(size);
         }
-
-        cpuUsage = 0.0f;
-        if (cpuUsagePercent.size() > 0) {
+        size = sizeof(cpuUsagePercent) / sizeof(cpuUsagePercent[0]);
+        if (size > 0) {
             int cpu_size = 0;
-            for (cpu_size = 0; cpu_size < cpuUsagePercent.size(); cpu_size++) {
+            for (cpu_size = 0; cpu_size < size; cpu_size++) {
                 if (cpuUsagePercent[cpu_size] <= 0) break;
                 cpuUsage += cpuUsagePercent[cpu_size];
             }
@@ -2570,7 +2568,7 @@ public:
 #include "msgq/visionipc/visionipc_server.h"
 #include <QImage>
 #include <QPainter>
-#include <QPainterPath> // 添加
+#include <QPainterPath> // 추가
 
 class MapRenderer {
 public:
@@ -2585,15 +2583,15 @@ public:
     }
 
     void render(QPointF nav_path_vertex_xy[], int vertex_count) {
-        // 创建并初始化QImage
-        QImage image(WIDTH, HEIGHT, QImage::Format_RGBA8888); // RGBA格式
-        image.fill(Qt::black); // 黑色背景
+        // QImage 생성 및 초기화
+        QImage image(WIDTH, HEIGHT, QImage::Format_RGBA8888); // RGBA 형식
+        image.fill(Qt::black); // 검정 배경
 
         QPainter painter(&image);
-        painter.setPen(QPen(Qt::white, 15)); // 路径颜色及粗细设置
+        painter.setPen(QPen(Qt::white, 15)); // 경로 색상 및 두께 설정
         painter.setRenderHint(QPainter::Antialiasing, true);
 
-        // 绘制路径
+        // 경로 그리기
         if (vertex_count > 2) {
             QPainterPath path;
             path.moveTo(nav_path_vertex_xy[0].x() * pixels_per_meter + WIDTH / 2.0,
@@ -2606,8 +2604,8 @@ public:
         }
         painter.end();
 
-        // 将QImage数据传递给NanoVG
-        memcpy(image_data.data(), image.bits(), WIDTH * HEIGHT * 4); // RGBA大小
+        // QImage 데이터를 NanoVG에 전달
+        memcpy(image_data.data(), image.bits(), WIDTH * HEIGHT * 4); // RGBA 크기
     }
 
     bool publish() {
@@ -2615,14 +2613,14 @@ public:
         if (cur_t > vipc_sent_t + 500) {
             vipc_sent_t = cur_t;
 
-            // 向Vision IPC缓冲区传输数据
+            // Vision IPC 버퍼에 데이터 전송
             VisionBuf* buf = vipc_server->get_buffer(VisionStreamType::VISION_STREAM_MAP);
 
             uint8_t* dst = (uint8_t*)buf->addr;
-            memset(dst, 128, buf->len); // 初始化
+            memset(dst, 128, buf->len); // 초기화
 
             for (int i = 0; i < WIDTH * HEIGHT; i++) {
-                dst[i] = image_data[i * 4]; // 使用R值进行灰度转换
+                dst[i] = image_data[i * 4]; // R 값을 사용하여 grayscale 변환
             }
 
             VisionIpcBufExtra extra = {
@@ -2639,21 +2637,21 @@ public:
     }
 
     void test_draw(NVGcontext* vg) {
-        static int tex_id = -1; // 纹理ID存储
+        static int tex_id = -1; // 텍스처 ID 저장
         if (tex_id == -1) {
             tex_id = nvgCreateImageRGBA(vg, WIDTH, HEIGHT, 0, image_data.data());
         }
         else {
-            // 纹理更新
+            // 텍스처 업데이트
             nvgUpdateImage(vg, tex_id, image_data.data());
         }
 
-        // 在屏幕上绘制纹理
+        // 텍스처를 화면에 그리기
         float x_offset = 200;
         float y_offset = 200;
         NVGpaint img_paint = nvgImagePattern(vg, x_offset, y_offset, WIDTH, HEIGHT, 0, tex_id, 1.0f);
         nvgBeginPath(vg);
-        nvgRect(vg, x_offset, y_offset, WIDTH, HEIGHT); // 绘制纹理的区域
+        nvgRect(vg, x_offset, y_offset, WIDTH, HEIGHT); // 텍스처를 그릴 영역
         nvgFillPaint(vg, img_paint);
         nvgFill(vg);
     }
@@ -2662,7 +2660,7 @@ private:
     std::unique_ptr<VisionIpcServer> vipc_server;
     uint32_t frame_id = 0;
     double vipc_sent_t = 0.0;
-    float pixels_per_meter = 0.5f; // 像素单位调整
+    float pixels_per_meter = 0.5f; // 픽셀 단위 조정
     const int HEIGHT = 256, WIDTH = 256;
     std::vector<unsigned char> image_data;
 };
@@ -2707,7 +2705,7 @@ void ui_draw(UIState *s, ModelRenderer* model_renderer, int w, int h) {
   int path_x = drawPathEnd.getPathX();
   int path_y = drawPathEnd.getPathY();
   drawDesire.draw(s, path_x, path_y - 135);
-
+  
 
   drawPlot.draw(s);
 
@@ -2860,42 +2858,7 @@ public:
 
         // bottom_left
         QString gitBranch = QString::fromStdString(params.get("GitBranch"));
-
-                // 获取速度相关数据
-        float v_ego_kph = car_state.getVEgo() * MS_TO_KPH;
-        float v_cruise = car_state.getVCruiseCluster();
-
-        // 获取其他速度数据
-        float apply_speed = 250.0;
-        int nRoadLimitSpeed = 30;
-        int xSpdLimit = 0;
-        float cruiseTarget = 0.0;
-
-        // 从carrot_man获取数据（如果可用）
-        if (sm.alive("carrotMan")) {
-            const auto carrot_man = sm["carrotMan"].getCarrotMan();
-            apply_speed = carrot_man.getDesiredSpeed();
-            nRoadLimitSpeed = carrot_man.getNRoadLimitSpeed();
-            xSpdLimit = carrot_man.getXSpdLimit();
-        }
-
-        // 从longitudinalPlan获取cruiseTarget
-        if (sm.alive("longitudinalPlan")) {
-            const auto lp = sm["longitudinalPlan"].getLongitudinalPlan();
-            cruiseTarget = lp.getCruiseTarget();
-        }
-
-        // 格式化速度信息字符串
-        char speed_info[256];
-        sprintf(speed_info, "%s_%.0f_%.0f_%.0f_%d_%d_%.0f",
-                gitBranch.toStdString().c_str(),
-                v_ego_kph,
-                v_cruise,
-                apply_speed,
-                nRoadLimitSpeed,
-                xSpdLimit,
-                cruiseTarget);
-        sprintf(bottom_left, "%s", speed_info);
+        sprintf(bottom_left, "%s", gitBranch.toStdString().c_str());
 
         // bottom_right
         Params params_memory = Params("/dev/shm/params");
