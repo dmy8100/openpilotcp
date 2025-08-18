@@ -750,14 +750,14 @@ public:
                 ui_draw_text(s, x + w, disp_y, str, 40, text_color, BOLD);
             }
         }
-        QPolygonF tf_vertext;
+        /*QPolygonF tf_vertext;
         if (tf_distance > 0) {
           tf_vertext.push_back(tf_vertex_left);
           tf_vertext.push_back(tf_vertex_right);
           ui_draw_line(s, tf_vertext, nullptr, nullptr, 3.0, COLOR_WHITE);
           sprintf(str, "%.1f(%.2f)", tf_distance, t_follow);
           ui_draw_text(s, tf_vertex_right.x(), tf_vertex_right.y(), str, 25, COLOR_WHITE, BOLD);
-        }
+        }*/
 
 
         float px[7], py[7];
@@ -782,7 +782,7 @@ public:
             ui_draw_line2(s, px, py, 7, &pcolor, nullptr, 3.0f);
         }
         if (isLeadDetected()) {
-            NVGcolor radar_stroke = isRadarDetected() ? rcolor : COLOR_BLUE;
+            NVGcolor radar_stroke = isRadarDetected() ? rcolor : COLOR_RED;
             ui_fill_rect(s->vg, { (int)(path_x - path_width / 2 - 10), (int)(path_y - path_width * 0.8), (int)(path_width + 20), (int)(path_width * 0.8) }, COLOR_BLACK_ALPHA(20), 15, 3, &radar_stroke);
 #if 0
             px[0] = path_x - path_width / 2 - 10;
