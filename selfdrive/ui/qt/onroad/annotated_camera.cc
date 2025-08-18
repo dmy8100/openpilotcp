@@ -171,9 +171,9 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
     bool has_wide_cam = available_streams.count(VISION_STREAM_WIDE_ROAD);
     if (has_wide_cam) {
       float v_ego = sm["carState"].getCarState().getVEgo();
-      if ((v_ego < 7) || available_streams.size() == 1) {
+      if ((v_ego < 6) || available_streams.size() == 1) {
         wide_cam_requested = true;
-      } else if (v_ego > 12) {
+      } else if (v_ego > 11) {
         wide_cam_requested = false;
       }
       //wide_cam_requested = wide_cam_requested && sm["selfdriveState"].getSelfdriveState().getExperimentalMode();

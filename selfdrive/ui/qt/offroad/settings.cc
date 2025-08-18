@@ -588,10 +588,10 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   main_layout = new QStackedLayout(this);
   homeScreen = new QWidget(this);
   carrotLayout = new QVBoxLayout(homeScreen);
-  carrotLayout->setMargin(40);
+  carrotLayout->setMargin(1);
 
   QHBoxLayout* select_layout = new QHBoxLayout();
-  select_layout->setSpacing(30);
+  select_layout->setSpacing(1);
 
 
   QPushButton* start_btn = new QPushButton(tr("启动"));
