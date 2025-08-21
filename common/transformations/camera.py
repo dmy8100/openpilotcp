@@ -46,9 +46,9 @@ class DeviceCameraConfig:
       if not isinstance(getattr(self, cam), _NoneCameraConfig):
         yield cam, getattr(self, cam)
 
-_ar_ox_fisheye = CameraConfig(1920, 1080, 1027.0)  # focal length probably wrong? magnification is not consistent across frame
+_ar_ox_fisheye = CameraConfig(1920, 1080, 605.0)  # focal length probably wrong? magnification is not consistent across frame
 _os_fisheye = CameraConfig(2688 // 2, 1520 // 2, 567.0 / 4 * 3)
-_ar_ox_config = DeviceCameraConfig(CameraConfig(1920, 1080, 2780.0), _ar_ox_fisheye, _ar_ox_fisheye)
+_ar_ox_config = DeviceCameraConfig(CameraConfig(1920, 1080, 2520.0), _ar_ox_fisheye, _ar_ox_fisheye)
 _os_config = DeviceCameraConfig(CameraConfig(2688 // 2, 1520 // 2, 1522.0 * 3 / 4), _os_fisheye, _os_fisheye)
 _neo_config = DeviceCameraConfig(CameraConfig(1164, 874, 910.0), CameraConfig(816, 612, 650.0), _NoneCameraConfig())
 
