@@ -353,7 +353,7 @@ class VCruiseCarrot:
 
       # 检查是否有resume按钮事件
       resume_pressed = any(b.type == ButtonType.resumeCruise for b in CS.buttonEvents)
-    
+
       # 如果检测到resume按钮且巡航已初始化，则恢复上次的巡航速度
       if resume_pressed and self.v_cruise_initialized:
           # 优先恢复刹车时保存的速度（如果有），否则恢复上次巡航速度
@@ -378,7 +378,7 @@ class VCruiseCarrot:
 
     SPEED_UP_UNIT = 1
     SPEED_DOWN_UNIT = self._cruise_speed_unit if self._cruise_button_mode in [1, 2, 3] else 1
-    V_CRUISE_DELTA = 10
+    V_CRUISE_DELTA = 5
     is_metric = self.is_metric
 
     # long press tracking
@@ -533,9 +533,9 @@ class VCruiseCarrot:
       elif button_type == ButtonType.gapAdjustCruise:
         longitudinalPersonalityMax = self.params.get_int("LongitudinalPersonalityMax")
         if CS.pcmCruiseGap == 0:
-          personality = (self.params.get_int('LongitudinalPersonality') - 1) % longitudinalPersonalityMax
+          personality = (self.params.get_int('LongitudinalPersonality') + 1) % longitudinalPersonalityMax
         else:
-          personality = np.clip(CS.pcmCruiseGap - 1, 0, longitudinalPersonalityMax)
+          personality = np.clip(CS.pcmCruiseGap + 1, 0, longitudinalPersonalityMax)
         self.params.put_int_nonblocking('LongitudinalPersonality', personality)
         #self.events.append(EventName.personalityChanged)
       elif button_type == ButtonType.lfaButton:
@@ -550,7 +550,7 @@ class VCruiseCarrot:
           else:
             self._paddle_decel_active = True
         print("lfaButton")
-      #取消  
+      #取消
       elif button_type == ButtonType.cancel:
         self._paddle_decel_active = False
         #if self._cruise_cancel_state:
@@ -558,7 +558,7 @@ class VCruiseCarrot:
         #  self._add_log("Lateral " + "enabled" if self._lat_enabled else "disabled")
         self._cruise_cancel_state = True
         #self._v_cruise_kph_at_brake = 0
-    #长按    
+    #长按
     else:
       if button_type == ButtonType.accelCruise:
         v_cruise_kph = button_kph

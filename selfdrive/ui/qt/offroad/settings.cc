@@ -673,7 +673,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   cruiseToggles->addItem(new CValueControl("TFollowGap4", "间距4: 应用TFollow (180)x0.01s", "", "../assets/offroad/icon_road.png", 70, 300, 5));
   cruiseToggles->addItem(new CValueControl("DynamicTFollow", "动态间距控制", "", "../assets/offroad/icon_road.png", 0, 100, 5));
   cruiseToggles->addItem(new CValueControl("DynamicTFollowLC", "动态间距控制 (变道)", "", "../assets/offroad/icon_road.png", 0, 100, 5));
-  cruiseToggles->addItem(new CValueControl("MyDrivingMode", "驾驶模式: 选择", "1:节能,2:安全,3:正常,4:高速", "../assets/offroad/icon_road.png", 1, 4, 1));
+  cruiseToggles->addItem(new CValueControl("MyDrivingMode", "驾驶模式: 选择", "1:经济,2:安全,3:标准,4:运动", "../assets/offroad/icon_road.png", 1, 4, 1));
   cruiseToggles->addItem(new CValueControl("MyDrivingModeAuto", "驾驶模式: 自动", "仅正常模式", "../assets/offroad/icon_road.png", 0, 1, 1));
   cruiseToggles->addItem(new CValueControl("TrafficLightDetectMode", "交通灯检测模式", "0:无, 1:仅停车, 2: 停车&通行", "../assets/offroad/icon_road.png", 0, 2, 1));
   //cruiseToggles->addItem(new CValueControl("MyEcoModeFactor", "驾驶模式: 节能加速比例(80%)", "节能模式下的加速比例", "../assets/offroad/icon_road.png", 10, 95, 5));
