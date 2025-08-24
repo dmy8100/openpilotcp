@@ -94,7 +94,7 @@ mat4 AnnotatedCameraWidget::calcFrameMatrix() {
    // Compute the calibration transformation matrix
   const auto calib_transform = intrinsic_matrix * calibration;
 
-  float zoom = wide_cam ? 1.1 : 1.1;
+  float zoom = wide_cam ? 1.5 : 1.0;
   Eigen::Vector3f inf(1000., 0., 0.);
   auto Kep = calib_transform * inf;
 
