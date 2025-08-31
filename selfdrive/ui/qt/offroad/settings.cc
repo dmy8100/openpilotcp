@@ -717,7 +717,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   latLongToggles->addItem(new CValueControl("MaxAngleFrames", "最大角度帧数(89)", "89:基本, 转向仪表板错误85~87", "../assets/offroad/icon_logic.png", 80, 100, 1));
   latLongToggles->addItem(new CValueControl("SteerActuatorDelay", "横向:转向执行器延迟(30)", "x0.01, 0:实时延迟", "../assets/offroad/icon_logic.png", 0, 100, 1));
   latLongToggles->addItem(new CValueControl("LateralTorqueCustom", "横向: 扭矩自定义(0)", "", "../assets/offroad/icon_logic.png", 0, 2, 1));
-  latLongToggles->addItem(new CValueControl("LateralTorqueAccelFactor", "横向: 扭矩加速度因子(2500)", "", "../assets/offroad/icon_logic.png", 1000, 6000, 10));
+  latLongToggles->addItem(new CValueControl("LateralTorqueAccelFactor", "横向: 扭矩加速度因子(2500)", "", "../assets/offroad/icon_logic.png", 1000, 6000, 100));
   latLongToggles->addItem(new CValueControl("LateralTorqueFriction", "横向: 扭矩摩擦(100)", "", "../assets/offroad/icon_logic.png", 0, 1000, 10));
   latLongToggles->addItem(new CValueControl("CustomSteerMax", "横向: 自定义转向最大值(0)", "", "../assets/offroad/icon_logic.png", 0, 30000, 5));
   latLongToggles->addItem(new CValueControl("CustomSteerDeltaUp", "横向: 自定义转向增量上升(0)", "", "../assets/offroad/icon_logic.png", 0, 50, 1));

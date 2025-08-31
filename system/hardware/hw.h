@@ -26,7 +26,7 @@ namespace Path {
     if (const char *env = getenv("LOG_ROOT")) {
       return env;
     }
-    return Hardware::PC() ? Path::comma_home() + "/media/0/realdata" : "/data/media/0/realdata";
+    return Hardware::PC() ? Path::comma_home() + "/media/0/realdata" : "/.comma/media/0/realdata";
   }
 
   inline std::string params() {

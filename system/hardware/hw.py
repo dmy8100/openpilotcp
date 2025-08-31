@@ -18,7 +18,7 @@ class Paths:
     elif PC:
       return str(Path(Paths.comma_home()) / "media" / "0" / "realdata")
     else:
-      return '/data/media/0/realdata/'
+      return '/.comma/media/0/realdata/'
 
   @staticmethod
   def swaglog_root() -> str:

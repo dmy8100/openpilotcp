@@ -676,7 +676,7 @@ class CarrotMan:
 
   def make_tmux_data(self):
     try:
-      subprocess.run("rm /data/media/tmux.log; tmux capture-pane -pq -S-1000 > /data/media/tmux.log", shell=True, capture_output=True, text=False)
+      subprocess.run("rm /.comma/media/tmux.log; tmux capture-pane -pq -S-1000 > /.comma/media/tmux.log", shell=True, capture_output=True, text=False)
       subprocess.run("/home/my/openpilot/selfdrive/apilot.py", shell=True, capture_output=True, text=False)
     except Exception as e:
       print(f"TMUX creation error: {e}")
@@ -707,7 +707,7 @@ class CarrotMan:
     ftp.cwd(directory)
 
     try:
-      with open("/data/media/tmux.log", "rb") as file:
+      with open("/.comma/media/tmux.log", "rb") as file:
         ftp.storbinary(f'STOR {filename}', file)
     except Exception as e:
       print(f"ftp sending error...: {e}")

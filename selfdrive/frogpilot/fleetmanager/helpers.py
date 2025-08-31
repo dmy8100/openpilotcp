@@ -58,7 +58,7 @@ if PC:
   SCREENRECORD_PATH = os.path.join(str(Path.home()), ".comma", "media", "0", "videos", "")
   ERROR_LOGS_PATH = os.path.join(str(Path.home()), ".comma", "community", "crashes", "")
 else:
-  SCREENRECORD_PATH = "/data/media/0/videos/"
+  SCREENRECORD_PATH = "/.comma/media/0/videos/"
   ERROR_LOGS_PATH = "/data/community/crashes/"
 
 
@@ -197,7 +197,7 @@ def ffmpeg_mp4_wrap_process_builder(filename):
   command_line += ["-c", "copy"]
 
   command_line += ["-bsf:a", "aac_adtstoasc"]
-  
+
   command_line += ["-map", "0"]
   if extension == "hevc":
     command_line += ["-vtag", "hvc1"]

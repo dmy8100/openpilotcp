@@ -38,7 +38,7 @@ ScreenRecoder::ScreenRecoder(QWidget *parent) : QPushButton(parent), image_queue
     }
   });
 
-  std::string path = "/data/media/0/videos";
+  std::string path = "/.comma/media/0/videos";
   src_width = 2160;
   src_height = 1080;
 
@@ -146,7 +146,7 @@ void ScreenRecoder::encoding_thread_func() {
               rgb_scale_buffer.get(), dst_width*4,
               dst_width, dst_height,
               libyuv::kFilterLinear);
-  
+
         encoder->encode_frame_rgba(rgb_scale_buffer.get(), dst_width, dst_height, ((uint64_t)nanos_since_boot() - start_time ));
       } catch (...) {
         printf("Encoding failed, skipping frame\n");

@@ -542,7 +542,7 @@ def find_navicon(file_name):
 
 @app.route("/previewgif/<path:file_path>", methods=['GET'])
 def find_previewgif(file_path):
-  directory = "/data/media/0/realdata/"
+  directory = "/.comma/media/0/realdata/"
   return send_from_directory(directory, file_path, as_attachment=True)
 
 @app.route("/tools", methods=['GET'])
