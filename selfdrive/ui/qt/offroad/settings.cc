@@ -185,17 +185,17 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   QHBoxLayout* power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
 
-  QPushButton* reboot_btn = new QPushButton(tr("Reboot"));
+  QPushButton* reboot_btn = new QPushButton(tr("重启"));
   reboot_btn->setObjectName("reboot_btn");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::clicked, this, &DevicePanel::reboot);
   //차선캘리
-  QPushButton *reset_CalibBtn = new QPushButton(tr("ReCalibration"));
+  QPushButton *reset_CalibBtn = new QPushButton(tr("重新校准"));
   reset_CalibBtn->setObjectName("reset_CalibBtn");
   power_layout->addWidget(reset_CalibBtn);
   QObject::connect(reset_CalibBtn, &QPushButton::clicked, this, &DevicePanel::calibration);
 
-  QPushButton* poweroff_btn = new QPushButton(tr("Power Off"));
+  QPushButton* poweroff_btn = new QPushButton(tr("关机"));
   poweroff_btn->setObjectName("poweroff_btn");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::clicked, this, &DevicePanel::poweroff);
@@ -209,12 +209,12 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   QHBoxLayout* init_layout = new QHBoxLayout();
   init_layout->setSpacing(30);
 
-  QPushButton* init_btn = new QPushButton(tr("Git Pull & Reboot"));
+  QPushButton* init_btn = new QPushButton(tr("Git 拉取 & 重启"));
   init_btn->setObjectName("init_btn");
   init_layout->addWidget(init_btn);
   //QObject::connect(init_btn, &QPushButton::clicked, this, &DevicePanel::reboot);
   QObject::connect(init_btn, &QPushButton::clicked, [&]() {
-    if (ConfirmationDialog::confirm(tr("Git pull & Reboot?"), tr("Yes"), this)) {
+    if (ConfirmationDialog::confirm(tr("执行 Git 拉取 & 重启？"), tr("是"), this)) {
       QString cmd =
         "bash -c 'cd /data/openpilot && "
         "git fetch && "
@@ -225,34 +225,34 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
         "fi'";
 
       if (!QProcess::startDetached(cmd)) {
-        ConfirmationDialog::alert(tr("Failed to start update process."), this);
+        ConfirmationDialog::alert(tr("启动更新过程失败。"), this);
       }
       else {
-        ConfirmationDialog::alert(tr("Update process started. Device will reboot if updates are applied."), this);
+        ConfirmationDialog::alert(tr("更新过程已启动。如果有更新，设备将重启。"), this);
       }
     }
     });
 
-  QPushButton* default_btn = new QPushButton(tr("Set default"));
+  QPushButton* default_btn = new QPushButton(tr("恢复默认"));
   default_btn->setObjectName("default_btn");
   init_layout->addWidget(default_btn);
   //QObject::connect(default_btn, &QPushButton::clicked, this, &DevicePanel::poweroff);
   QObject::connect(default_btn, &QPushButton::clicked, [&]() {
-    if (ConfirmationDialog::confirm(tr("Set to default?"), tr("Yes"), this)) {
+    if (ConfirmationDialog::confirm(tr("恢复为默认设置？"), tr("是"), this)) {
       //emit parent->closeSettings();
       QTimer::singleShot(1000, []() {
-        printf("Set to default\n");
+        printf("恢复为默认设置\n");
         Params().putInt("SoftRestartTriggered", 2);
-        printf("Set to default2\n");
+        printf("恢复为默认设置完成\n");
         });
     }
     });
 
-  QPushButton* remove_mapbox_key_btn = new QPushButton(tr("Remove MapboxKey"));
+  QPushButton* remove_mapbox_key_btn = new QPushButton(tr("移除 Mapbox Key"));
   remove_mapbox_key_btn->setObjectName("remove_mapbox_key_btn");
   init_layout->addWidget(remove_mapbox_key_btn);
   QObject::connect(remove_mapbox_key_btn, &QPushButton::clicked, [&]() {
-    if (ConfirmationDialog::confirm(tr("Remove Mapbox key?"), tr("Yes"), this)) {
+    if (ConfirmationDialog::confirm(tr("移除 Mapbox Key？"), tr("是"), this)) {
       QTimer::singleShot(1000, []() {
         Params().put("MapboxPublicKey", "");
         Params().put("MapboxSecretKey", "");
@@ -299,7 +299,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   });
   addItem(retrainingBtn);
 
-  auto statusCalibBtn = new ButtonControl(tr("Calibration Status"), tr("SHOW"), "");
+  auto statusCalibBtn = new ButtonControl(tr("校准状态"), tr("显示"), "");
   connect(statusCalibBtn, &ButtonControl::showDescriptionEvent, this, &DevicePanel::updateCalibDescription);
   addItem(statusCalibBtn);
 
@@ -406,7 +406,7 @@ void DevicePanel::calibration() {
   if (!uiState()->engaged()) {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration?"), tr("ReCalibration"), this)) {
       if (!uiState()->engaged()) {
-        std::thread worker(execAndReboot, "cd /data/params/d_tmp;  rm -f CalibrationParams");
+        std::thread worker(execAndReboot, "rm -f /home/my/.comma/params/d/CalibrationParams");
         worker.detach();
       }
     }
@@ -503,8 +503,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   if(false) {
     panels.append({tr("Firehose"), new FirehosePanel(this)});
   }
-  panels.append({ tr("Carrot"), new CarrotPanel(this) });
-  panels.append({ tr("Developer"), new DeveloperPanel(this) });
+  panels.append({ tr("萝卜"), new CarrotPanel(this) });
+  panels.append({ tr("开发"), new DeveloperPanel(this) });
 
   nav_btns = new QButtonGroup(this);
   for (auto &[name, panel] : panels) {
@@ -590,13 +590,13 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   main_layout = new QStackedLayout(this);
   homeScreen = new QWidget(this);
   carrotLayout = new QVBoxLayout(homeScreen);
-  carrotLayout->setMargin(10);
+  carrotLayout->setMargin(1);
 
   QHBoxLayout* select_layout = new QHBoxLayout();
-  select_layout->setSpacing(10);
+  select_layout->setSpacing(1);
 
 
-  QPushButton* start_btn = new QPushButton(tr("Start"));
+  QPushButton* start_btn = new QPushButton(tr("开始"));
   start_btn->setObjectName("start_btn");
   QObject::connect(start_btn, &QPushButton::clicked, this, [this]() {
     this->currentCarrotIndex = 0;
@@ -604,7 +604,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     updateButtonStyles();
   });
 
-  QPushButton* cruise_btn = new QPushButton(tr("Cruise"));
+  QPushButton* cruise_btn = new QPushButton(tr("巡航"));
   cruise_btn->setObjectName("cruise_btn");
   QObject::connect(cruise_btn, &QPushButton::clicked, this, [this]() {
     this->currentCarrotIndex = 1;
@@ -612,7 +612,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     updateButtonStyles();
   });
 
-  QPushButton* speed_btn = new QPushButton(tr("Speed"));
+  QPushButton* speed_btn = new QPushButton(tr("速度"));
   speed_btn->setObjectName("speed_btn");
   QObject::connect(speed_btn, &QPushButton::clicked, this, [this]() {
     this->currentCarrotIndex = 2;
@@ -620,7 +620,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     updateButtonStyles();
   });
 
-  QPushButton* latLong_btn = new QPushButton(tr("Tuning"));
+  QPushButton* latLong_btn = new QPushButton(tr("调节"));
   latLong_btn->setObjectName("latLong_btn");
   QObject::connect(latLong_btn, &QPushButton::clicked, this, [this]() {
     this->currentCarrotIndex = 3;
@@ -628,7 +628,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     updateButtonStyles();
   });
 
-  QPushButton* disp_btn = new QPushButton(tr("Disp"));
+  QPushButton* disp_btn = new QPushButton(tr("显示"));
   disp_btn->setObjectName("disp_btn");
   QObject::connect(disp_btn, &QPushButton::clicked, this, [this]() {
     this->currentCarrotIndex = 4;
@@ -636,7 +636,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     updateButtonStyles();
   });
 
-  QPushButton* path_btn = new QPushButton(tr("Path"));
+  QPushButton* path_btn = new QPushButton(tr("轨迹"));
   path_btn->setObjectName("path_btn");
   QObject::connect(path_btn, &QPushButton::clicked, this, [this]() {
     this->currentCarrotIndex = 5;
@@ -659,22 +659,22 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   QVBoxLayout* toggles_layout = new QVBoxLayout(toggles);
 
   cruiseToggles = new ListWidget(this);
-  cruiseToggles->addItem(new CValueControl("CruiseButtonMode", "Button: Cruise Button Mode", "0:Normal,1:User1,2:User2", 0, 2, 1));
-  cruiseToggles->addItem(new CValueControl("CancelButtonMode", "Button: Cancel Button Mode", "0:Long,1:Long+Lat", 0, 1, 1));
-  cruiseToggles->addItem(new CValueControl("LfaButtonMode", "Button: LFA Button Mode", "0:Normal,1:Decel&Stop&LeadCarReady", 0, 1, 1));
-  cruiseToggles->addItem(new CValueControl("CruiseSpeedUnitBasic", "Button: Cruise Speed Unit(Basic)", "", 1, 20, 1));
-  cruiseToggles->addItem(new CValueControl("CruiseSpeedUnit", "Button: Cruise Speed Unit(Extra)", "", 1, 20, 1));
-  cruiseToggles->addItem(new CValueControl("CruiseEcoControl", "CRUISE: Eco control(4km/h)", "Temporarily increasing the set speed to improve fuel efficiency.", 0, 10, 1));
-  cruiseToggles->addItem(new CValueControl("AutoSpeedUptoRoadSpeedLimit", "CRUISE: Auto speed up (0%)", "Auto speed up based on the lead car up to RoadSpeedLimit.", 0, 200, 10));
-  cruiseToggles->addItem(new CValueControl("TFollowGap1", "GAP1: Apply TFollow (110)x0.01s", "", 70, 300, 5));
-  cruiseToggles->addItem(new CValueControl("TFollowGap2", "GAP2: Apply TFollow (120)x0.01s", "", 70, 300, 5));
-  cruiseToggles->addItem(new CValueControl("TFollowGap3", "GAP3: Apply TFollow (160)x0.01s", "", 70, 300, 5));
-  cruiseToggles->addItem(new CValueControl("TFollowGap4", "GAP4: Apply TFollow (180)x0.01s", "", 70, 300, 5));
-  cruiseToggles->addItem(new CValueControl("DynamicTFollow", "Dynamic GAP control", "", 0, 100, 5));
-  cruiseToggles->addItem(new CValueControl("DynamicTFollowLC", "Dynamic GAP control (LaneChange)", "", 0, 100, 5));
-  cruiseToggles->addItem(new CValueControl("MyDrivingMode", "DRIVEMODE: Select", "1:ECO,2:SAFE,3:NORMAL,4:HIGH", 1, 4, 1));
-  cruiseToggles->addItem(new CValueControl("MyDrivingModeAuto", "DRIVEMODE: Auto", "NORMAL mode only", 0, 1, 1));
-  cruiseToggles->addItem(new CValueControl("TrafficLightDetectMode", "TrafficLight DetectMode", "0:None, 1:Stopping only, 2: Stop & Go", 0, 2, 1));
+  cruiseToggles->addItem(new CValueControl("CruiseButtonMode", "巡航模式设置", "0:常规,1:模式1,2:模式2", 0, 2, 1));
+  cruiseToggles->addItem(new CValueControl("CancelButtonMode", "取消模式设置", "0:取消纵向控制,1:取消纵向+取消横向", 0, 1, 1));
+  cruiseToggles->addItem(new CValueControl("LfaButtonMode", "LFA模式设置", "0:常规,1:减速&停止&跟随前车", 0, 1, 1));
+  cruiseToggles->addItem(new CValueControl("CruiseSpeedUnitBasic", "巡航速度基本单位", "每次调整的最小幅度，用于设定或降低车速的增减单位。", 1, 20, 1));
+  cruiseToggles->addItem(new CValueControl("CruiseSpeedUnit", "巡航速度附加调整单位", "适用于车型 1、2、3 及 Gastok 车型，用于设定或降低车速的增减步长。", 1, 20, 1));
+  cruiseToggles->addItem(new CValueControl("CruiseEcoControl", "巡航节能控制(4km/h)", "暂时提高设定车速以提升燃油经济性。", 0, 10, 1));
+  cruiseToggles->addItem(new CValueControl("AutoSpeedUptoRoadSpeedLimit", "巡航自动提速百分比(0%)", "根据前车速度可超过导航限速的百分比.", 0, 200, 10));
+  cruiseToggles->addItem(new CValueControl("TFollowGap1", "跟车时间GAP1(110)x0.01s", "跟车距离等级 1", 70, 300, 5));
+  cruiseToggles->addItem(new CValueControl("TFollowGap2", "跟车时间GAP2(120)x0.01s", "跟车距离等级 2", 70, 300, 5));
+  cruiseToggles->addItem(new CValueControl("TFollowGap3", "跟车时间GAP3(160)x0.01s", "跟车距离等级 3", 70, 300, 5));
+  cruiseToggles->addItem(new CValueControl("TFollowGap4", "跟车时间GAP4(180)x0.01s", "跟车距离等级 4", 70, 300, 5));
+  cruiseToggles->addItem(new CValueControl("DynamicTFollow", "动态跟车GAP控制", "根据前方车辆距离动态设定", 0, 100, 5));
+  cruiseToggles->addItem(new CValueControl("DynamicTFollowLC", "动态跟车GAP控制(变道场景)", "变道时，暂时缩短与前车间距", 0, 100, 5));
+  cruiseToggles->addItem(new CValueControl("MyDrivingMode", "驾驶模式选择", "1:节能模式（舒适制动，加速降低10%）,2:安全模式（舒适制动，加速降低20%）,3:常规模式,4:激进模式", 1, 4, 1));
+  cruiseToggles->addItem(new CValueControl("MyDrivingModeAuto", "驾驶模式自动调节", "0:关闭,1:开启(拥堵路况自动启用安全模式；当前车快速加速或车速超过 20 km/h 时，恢复常规模式。)", 0, 1, 1));
+  cruiseToggles->addItem(new CValueControl("TrafficLightDetectMode", "红绿灯检测", "0:不检测,1:仅红灯停，绿灯时需要踩油门启动,2:红灯停，绿灯行", 0, 2, 1));
   //cruiseToggles->addItem(new CValueControl("CruiseSpeedMin", "CRUISE: Speed Lower limit(10)", "Cruise control MIN speed", 5, 50, 1));
   //cruiseToggles->addItem(new CValueControl("AutoResumeFromGas", "GAS CRUISE ON: Use", "Auto Cruise on when GAS pedal released, 60% Gas Cruise On automatically", 0, 3, 1));
   //cruiseToggles->addItem(new CValueControl("AutoResumeFromGasSpeed", "GAS CRUISE ON: Speed(30)", "Driving speed exceeds the set value, Cruise ON", 20, 140, 5));
@@ -685,39 +685,39 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   //cruiseToggles->addItem(new CValueControl("MyHighModeFactor", "DRIVEMODE: HIGH ratio(100%)", "AccelRatio control ratio", 100, 300, 10));
 
   latLongToggles = new ListWidget(this);
-  latLongToggles->addItem(new CValueControl("UseLaneLineSpeed", "Laneline mode speed(0)", "Laneline mode, lat_mpc control used", 0, 200, 5));
-  latLongToggles->addItem(new CValueControl("UseLaneLineCurveSpeed", "Laneline mode curve speed(0)", "Laneline mode, high speed only", 0, 200, 5));
-  latLongToggles->addItem(new CValueControl("AdjustLaneOffset", "AdjustLaneOffset(0)cm", "", 0, 500, 5));
-  latLongToggles->addItem(new CValueControl("LaneChangeNeedTorque", "LaneChange need torque", "-1:Disable lanechange, 0: no need torque, 1:need torque", -1, 1, 1));
-  latLongToggles->addItem(new CValueControl("LaneChangeDelay", "LaneChange delay", "x0.1sec", 0, 100, 5));
-  latLongToggles->addItem(new CValueControl("LaneChangeBsd", "LaneChange Bsd", "-1:ignore bsd, 0:BSD detect, 1: block steer torque", -1, 1, 1));
-  latLongToggles->addItem(new CValueControl("CustomSR", "LAT: SteerRatiox0.1(0)", "Custom SteerRatio", 0, 300, 1));
-  latLongToggles->addItem(new CValueControl("SteerRatioRate", "LAT: SteerRatioRatex0.01(100)", "SteerRatio apply rate", 30, 170, 1));
-  latLongToggles->addItem(new CValueControl("PathOffset", "LAT: PathOffset", "(-)left, (+)right", -150, 150, 1));
-  latLongToggles->addItem(new CValueControl("SteerActuatorDelay", "LAT:SteerActuatorDelay(30)", "x0.01, 0:LiveDelay", 0, 100, 1));
-  latLongToggles->addItem(new CValueControl("LateralTorqueCustom", "LAT: TorqueCustom(0)", "", 0, 2, 1));
-  latLongToggles->addItem(new CValueControl("LateralTorqueAccelFactor", "LAT: TorqueAccelFactor(2500)", "", 1000, 6000, 10));
-  latLongToggles->addItem(new CValueControl("LateralTorqueFriction", "LAT: TorqueFriction(100)", "", 0, 1000, 10));
-  latLongToggles->addItem(new CValueControl("CustomSteerMax", "LAT: CustomSteerMax(0)", "", 0, 30000, 5));
-  latLongToggles->addItem(new CValueControl("CustomSteerDeltaUp", "LAT: CustomSteerDeltaUp(0)", "", 0, 50, 1));
-  latLongToggles->addItem(new CValueControl("CustomSteerDeltaDown", "LAT: CustomSteerDeltaDown(0)", "", 0, 50, 1));
-  latLongToggles->addItem(new CValueControl("LongTuningKpV", "LONG: P Gain(100)", "", 0, 150, 5));
-  latLongToggles->addItem(new CValueControl("LongTuningKiV", "LONG: I Gain(0)", "", 0, 2000, 5));
-  latLongToggles->addItem(new CValueControl("LongTuningKf", "LONG: FF Gain(100)", "", 0, 200, 5));
-  latLongToggles->addItem(new CValueControl("LongActuatorDelay", "LONG: ActuatorDelay(20)", "", 0, 200, 5));
-  latLongToggles->addItem(new CValueControl("VEgoStopping", "LONG: VEgoStopping(50)", "Stopping factor", 1, 100, 5));
-  latLongToggles->addItem(new CValueControl("RadarReactionFactor", "LONG: Radar reaction factor(100)", "", 0, 200, 10));
-  latLongToggles->addItem(new CValueControl("StoppingAccel", "LONG: StoppingStartAccelx0.01(-40)", "", -100, 0, 5));
-  latLongToggles->addItem(new CValueControl("StopDistanceCarrot", "LONG: StopDistance (600)cm", "", 300, 1000, 10));
-  latLongToggles->addItem(new CValueControl("JLeadFactor3", "LONG: Jerk Lead Factor (0)", "x0.01", 0, 100, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals0", "ACCEL:0km/h(160)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals1", "ACCEL:10km/h(160)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals2", "ACCEL:40km/h(120)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals3", "ACCEL:60km/h(100)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals4", "ACCEL:80km/h(80)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals5", "ACCEL:110km/h(70)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("CruiseMaxVals6", "ACCEL:140km/h(60)", "Acceleration needed at specified speed.(x0.01m/s^2)", 1, 250, 5));
-  latLongToggles->addItem(new CValueControl("MaxAngleFrames", "MaxAngleFrames(89)", "89:Basic, steering instrument panel error 85~87", 80, 100, 1));
+  latLongToggles->addItem(new CValueControl("UseLaneLineSpeed", "车道线模式速度(0)", "速度超过设定速度时切换到车道线模式", 0, 200, 5));
+  latLongToggles->addItem(new CValueControl("UseLaneLineCurveSpeed", "车道线模式弯道速度(0)", "低于此设定车速时，弯道车道线模式不生效。", 0, 200, 5));
+  latLongToggles->addItem(new CValueControl("AdjustLaneOffset", "车道偏移调整(0)cm", "向道路边缘/弯道内侧修正", 0, 500, 5));
+  latLongToggles->addItem(new CValueControl("LaneChangeNeedTorque", "自动变道手动确认", "-1:禁用自动变道, 0:不需要确认, 1:需要确认", -1, 1, 1));
+  latLongToggles->addItem(new CValueControl("LaneChangeDelay", "变道延迟", "设置值 x0.1秒，激活转向灯，经过设定的延迟时间再执行变道", 0, 100, 5));
+  latLongToggles->addItem(new CValueControl("LaneChangeBsd", "变道时盲区监测（BSD）", "-1:忽略BSD, 0:仅BSD报警, 1:BSD报警时阻止转向", -1, 1, 1));
+  latLongToggles->addItem(new CValueControl("CustomSR", "自定义转向比CustomSR ×0.1(0)", "自定义转向比，设为 0 时可使用实时转向比SteerRatioRate", 0, 300, 1));
+  latLongToggles->addItem(new CValueControl("SteerRatioRate", "自定义转向比倍率 ×0.01(100)", "实时转向比应用比例（需将 CustomSR 设为 0 才生效）", 30, 170, 1));
+  latLongToggles->addItem(new CValueControl("PathOffset", "横向路径偏移", "(-)向左偏移, (+)向右偏移", -150, 150, 1));
+  latLongToggles->addItem(new CValueControl("SteerActuatorDelay", "横向：转向执行延迟(30)", "x0.01, 转向延迟值， 数值越大，转向越早。设为 0 则使用实时延迟。", 0, 100, 1));
+  latLongToggles->addItem(new CValueControl("LateralTorqueCustom", "横向：横向力矩自定义(0)", "启用自定义力矩（力矩加速度因子、摩擦系数）", 0, 2, 1));
+  latLongToggles->addItem(new CValueControl("LateralTorqueAccelFactor", "横向：横向力矩加速度系数(2500)", "数值越小，力矩先逐渐增强到最强点，随后减弱——系统取该最强点对应的数值。", 1000, 6000, 10));
+  latLongToggles->addItem(new CValueControl("LateralTorqueFriction", "横向：横向力矩摩擦系数(100)", "数值越高，转向越细腻；建议设定范围 0–50。", 0, 1000, 10));
+  latLongToggles->addItem(new CValueControl("CustomSteerMax", "横向：自定义最大转向力矩(0)", "最大转向力矩值，请选用 270/384/409 中不会触发报错的最大数值", 0, 30000, 5));
+  latLongToggles->addItem(new CValueControl("CustomSteerDeltaUp", "横向：自定义转向力矩递增上限(0)", "扭矩车辆端 — 数值越高，方向盘转动速度越快", 0, 50, 1));
+  latLongToggles->addItem(new CValueControl("CustomSteerDeltaDown", "横向：自定义转向力矩递减下限(0)", "扭矩车辆端 — 数值越大，方向盘回正速度越快", 0, 50, 1));
+  latLongToggles->addItem(new CValueControl("LongTuningKpV", "纵向比例增益（P Gain）(100)", "纵向控制比例系数（即时误差响应）——建议 HKG 车型设为 100", 0, 150, 5));
+  latLongToggles->addItem(new CValueControl("LongTuningKiV", "纵向积分增益（I Gain）(0)", "纵向控制积分系数（累积误差修正），HKG 车型建议设为 0", 0, 2000, 5));
+  latLongToggles->addItem(new CValueControl("LongTuningKf", "纵向前馈增益（FF Gain）(100)", "纵向前馈修正系数 — HKG 车型建议设为 100", 0, 200, 5));
+  latLongToggles->addItem(new CValueControl("LongActuatorDelay", "纵向执行延迟 (20)", "纵向延迟值，数值越大，加速/减速动作越提前，HKG 车型建议设为 20", 0, 200, 5));
+  latLongToggles->addItem(new CValueControl("VEgoStopping", "起步车速阈值（VEgoStopping）(50)", "数值越小，起步越迅速；若设置过低，碰撞风险上升。建议设为 5", 1, 100, 5));
+  latLongToggles->addItem(new CValueControl("RadarReactionFactor", "纵向：雷达反应系数(100)", "数值越低，对前车的响应越快", 0, 200, 10));
+  latLongToggles->addItem(new CValueControl("StoppingAccel", "纵向：起步加速度x0.01(-40)", "车辆由静止启动时的加速度；设为 0 时采用传统计算方式", -100, 0, 5));
+  latLongToggles->addItem(new CValueControl("StopDistanceCarrot", "纵向：停止距离 (600)cm", "检测到红绿灯时的停车位置", 300, 1000, 10));
+  latLongToggles->addItem(new CValueControl("JLeadFactor3", "纵向：前车加速度响应系数(0)", "x0.01，数值越高，系统对前车加速度变化的响应越敏感", 0, 100, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals0", "加速度:0km/h(160)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals1", "加速度:10km/h(160)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals2", "加速度:40km/h(120)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals3", "加速度:60km/h(100)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals4", "加速度:80km/h(80)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals5", "加速度:110km/h(70)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("CruiseMaxVals6", "加速度:140km/h(60)", "指定速度下所需加速度(x0.01m/s^2)", 1, 250, 5));
+  latLongToggles->addItem(new CValueControl("MaxAngleFrames", "最大角度帧数(89)", "建议设为 89", 80, 100, 1));
   //latLongToggles->addItem(new CValueControl("AutoLaneChangeSpeed", "LaneChangeSpeed(20)", "", 1, 100, 5));
   //latLongToggles->addItem(new CValueControl("JerkStartLimit", "LONG: JERK START(10)x0.1", "Starting Jerk.", 1, 50, 1));
   //latLongToggles->addItem(new CValueControl("LongitudinalTuningApi", "LONG: ControlType", "0:velocity pid, 1:accel pid, 2:accel pid(comma)", 0, 2, 1));
@@ -727,16 +727,16 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   //latLongToggles->addItem(new CValueControl("CruiseMinVals", "DECEL:(120)", "Sets the deceleration rate.(x0.01m/s^2)", 50, 250, 5));
 
   dispToggles = new ListWidget(this);
-  dispToggles->addItem(new CValueControl("ShowDebugUI", "Debug Info", "", 0, 2, 1));
-  dispToggles->addItem(new CValueControl("ShowTpms", "Tpms Info", "", 0, 3, 1));
-  dispToggles->addItem(new CValueControl("ShowDateTime", "Time Info", "0:None,1:Time/Date,2:Time,3:Date", 0, 3, 1));
-  dispToggles->addItem(new CValueControl("ShowPathEnd", "Path End", "0:None,1:Display", 0, 1, 1));
-  dispToggles->addItem(new CValueControl("ShowDeviceState", "Device State", "0:None,1:Display", 0, 1, 1));
-  dispToggles->addItem(new CValueControl("ShowLaneInfo", "Lane Info", "-1:None, 0:Path, 1:Path+Lane, 2: Path+Lane+RoadEdge", -1, 2, 1));
-  dispToggles->addItem(new CValueControl("ShowRadarInfo", "Radar Info", "0:None,1:Display,2:RelPos,3:Stopped Car", 0, 3, 1));
-  dispToggles->addItem(new CValueControl("ShowRouteInfo", "Route Info", "0:None,1:Display", 0, 1, 1));
-  dispToggles->addItem(new CValueControl("ShowPlotMode", "Debug plot", "", 0, 10, 1));
-  dispToggles->addItem(new CValueControl("ShowCustomBrightness", "Brightness ratio", "", 0, 100, 10));
+  dispToggles->addItem(new CValueControl("ShowDebugUI", "调试信息", "0:不显示,1:显示", 0, 2, 1));
+  dispToggles->addItem(new CValueControl("ShowTpms", "胎压信息", "0:不显示,1:显示", 0, 3, 1));
+  dispToggles->addItem(new CValueControl("ShowDateTime", "时间信息", "0:不显示,1:时间/日期,2:仅时间,3:仅日期", 0, 3, 1));
+  dispToggles->addItem(new CValueControl("ShowPathEnd", "路线终点提示", "0:不显示,1:显示", 0, 1, 1));
+  dispToggles->addItem(new CValueControl("ShowDeviceState", "设备状态", "0:不显示,1:显示", 0, 1, 1));
+  dispToggles->addItem(new CValueControl("ShowLaneInfo", "车道信息", "-1: 不显示, 0: 仅路径, 1: 路径+车道线, 2: 路径+车道线+路缘", -1, 2, 1));
+  dispToggles->addItem(new CValueControl("ShowRadarInfo", "雷达信息", "0:不显示,1:仅显示,2:显示+相对位置,3:显示+静止障碍物", 0, 3, 1));
+  dispToggles->addItem(new CValueControl("ShowRouteInfo", "显示Route信息", "仅在已连接 APN 时生效，0:不显示,1:显示", 0, 1, 1));
+  dispToggles->addItem(new CValueControl("ShowPlotMode", "调试曲线图", "1:加速度，2:加速度+速度，3:模型数据，4:前车信息，5:第二辆前车信息", 0, 10, 1));
+  dispToggles->addItem(new CValueControl("ShowCustomBrightness", "屏幕亮度设置", "用于调节屏幕亮度；触摸屏幕或触发事件时会暂时增亮。", 0, 100, 10));
   //dispToggles->addItem(new CValueControl("ShowHudMode", "Display Mode", "0:Frog,1:APilot,2:Bottom,3:Top,4:Left,5:Left-Bottom", 0, 5, 1));
   //dispToggles->addItem(new CValueControl("ShowSteerRotate", "Handle rotate", "0:None,1:Rotate", 0, 1, 1));
   //dispToggles->addItem(new CValueControl("ShowAccelRpm", "Accel meter", "0:None,1:Display,1:Accel+RPM", 0, 2, 1));
@@ -748,16 +748,16 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   //dispToggles->addItem(new CValueControl("ShowDmInfo", "DM Info", "0:None,1:Display,-1:Disable(Reboot)", -1, 1, 1));
 
   pathToggles = new ListWidget(this);
-  pathToggles->addItem(new CValueControl("ShowPathColorCruiseOff", "Path Color: Cruise OFF", "(+10:Stroke)0:Red,1:Orange,2:Yellow,3:Green,4:Blue,5:Indigo,6:Violet,7:Brown,8:White,9:Black", 0, 19, 1));
-  pathToggles->addItem(new CValueControl("ShowPathMode", "Path Mode: Laneless", "0:Normal,1,2:Rec,3,4:^^,5,6:Rec,7,8:^^,9,10,11,12:Smooth^^", 0, 15, 1));
-  pathToggles->addItem(new CValueControl("ShowPathColor", "Path Color: Laneless", "(+10:Stroke)0:Red,1:Orange,2:Yellow,3:Green,4:Blue,5:Indigo,6:Violet,7:Brown,8:White,9:Black", 0, 19, 1));
-  pathToggles->addItem(new CValueControl("ShowPathModeLane", "Path Mode: LaneMode", "0:Normal,1,2:Rec,3,4:^^,5,6:Rec,7,8:^^,9,10,11,12:Smooth^^", 0, 15, 1));
-  pathToggles->addItem(new CValueControl("ShowPathColorLane", "Path Color: LaneMode", "(+10:Stroke)0:Red,1:Orange,2:Yellow,3:Green,4:Blue,5:Indigo,6:Violet,7:Brown,8:White,9:Black", 0, 19, 1));
-  pathToggles->addItem(new CValueControl("ShowPathWidth", "Path Width ratio(100%)", "", 10, 200, 10));
+  pathToggles->addItem(new CValueControl("ShowPathColorCruiseOff", "轨迹颜色：巡航关闭", "(+10:描边)0:红,1:橙,2:黄,3:绿,4:蓝,5:靛青,6:紫,7:棕,8:白,9:黑", 0, 19, 1));
+  pathToggles->addItem(new CValueControl("ShowPathMode", "轨迹模式：无车道线", "0:普通,1,2:推荐,3,4:^^,5,6:推荐,7,8:^^,9,10,11,12:平滑^^", 0, 15, 1));
+  pathToggles->addItem(new CValueControl("ShowPathColor", "轨迹颜色：无车道线", "(+10:描边)0:红,1:橙,2:黄,3:绿,4:蓝,5:靛青,6:紫,7:棕,8:白,9:黑", 0, 19, 1));
+  pathToggles->addItem(new CValueControl("ShowPathModeLane", "轨迹模式：车道线模式", "0:普通,1,2:推荐,3,4:^^,5,6:推荐,7,8:^^,9,10,11,12:平滑^^", 0, 15, 1));
+  pathToggles->addItem(new CValueControl("ShowPathColorLane", "轨迹颜色：车道线模式", "(+10:描边)0:红,1:橙,2:黄,3:绿,4:蓝,5:靛青,6:紫,7:棕,8:白,9:黑", 0, 19, 1));
+  pathToggles->addItem(new CValueControl("ShowPathWidth", "轨迹宽度比例(100%)", "", 10, 200, 10));
 
   startToggles = new ListWidget(this);
   QString selected = QString::fromStdString(Params().get("CarSelected3"));
-  QPushButton* selectCarBtn = new QPushButton(selected.length() > 1 ? selected : tr("SELECT YOUR CAR"));
+  QPushButton* selectCarBtn = new QPushButton(selected.length() > 1 ? selected : tr("选择您的车辆"));
   selectCarBtn->setObjectName("selectCarBtn");
   selectCarBtn->setStyleSheet(R"(
     QPushButton {
@@ -787,17 +787,17 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
     }
 
     QStringList manufacturers = car_groups.keys();
-    QString selectedManufacturer = MultiOptionDialog::getSelection("Select Manufacturer", manufacturers, manufacturers.isEmpty() ? "" : manufacturers.first(), this);
+    QString selectedManufacturer = MultiOptionDialog::getSelection("选择厂商", manufacturers, manufacturers.isEmpty() ? "" : manufacturers.first(), this);
 
     if (!selectedManufacturer.isEmpty()) {
       QStringList cars = car_groups[selectedManufacturer];
-      QString selectedCar = MultiOptionDialog::getSelection("Select your car", cars, selected, this);
+      QString selectedCar = MultiOptionDialog::getSelection("选择您的车辆", cars, selected, this);
 
       if (!selectedCar.isEmpty()) {
-        if (selectedCar == "[ Not Selected ]") {
+        if (selectedCar == "[ 未选择 ]") {
           Params().remove("CarSelected3");
         } else {
-          printf("Selected Car: %s\n", selectedCar.toStdString().c_str());
+          printf("已选择车辆: %s\n", selectedCar.toStdString().c_str());
           Params().put("CarSelected3", selectedCar.toStdString());
           QTimer::singleShot(1000, []() {
             Params().putInt("SoftRestartTriggered", 1);
@@ -805,60 +805,62 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
           ConfirmationDialog::alert(selectedCar, this);
         }
         selected = QString::fromStdString(Params().get("CarSelected3"));
-        selectCarBtn->setText((selected.isEmpty() || selected == "[ Not Selected ]") ? tr("SELECT YOUR CAR") : selected);
+        selectCarBtn->setText((selected.isEmpty() || selected == "[ 未选择 ]") ? tr("选择您的车辆") : selected);
       }
     }
   });
 
-  startToggles->addItem(selectCarBtn);
-  startToggles->addItem(new CValueControl("HyundaiCameraSCC", "HYUNDAI: CAMERA SCC", "1:Connect the SCC's CAN line to CAM, 2:Sync Cruise state, 3:StockLong", 0, 3, 1));
-  startToggles->addItem(new CValueControl("CanfdHDA2", "CANFD: HDA2 mode", "1:HDA2,2:HDA2+BSM", 0, 2, 1));
-  startToggles->addItem(new CValueControl("EnableRadarTracks", "Enable Radar Track", "1:Enable RadarTrack, -1,2:Disable use HKG SCC radar at all times", -1, 3, 1));
-  startToggles->addItem(new CValueControl("AutoCruiseControl", "Auto Cruise control", "Softhold, Auto Cruise ON/OFF control", 0, 3, 1));
-  startToggles->addItem(new CValueControl("CruiseOnDist", "CRUISE: Auto ON distance(0cm)", "When GAS/Brake is OFF, Cruise ON when the lead car gets closer.", 0, 2500, 50));
-  startToggles->addItem(new CValueControl("AutoEngage", "Auto Engage control on start", "1:SteerEnable, 2:Steer/Cruise Engage", 0, 2, 1));
-  startToggles->addItem(new CValueControl("AutoGasTokSpeed", "Auto AccelTok speed", "Gas(Accel)Tok enable speed", 0, 200, 5));
-  startToggles->addItem(new CValueControl("SpeedFromPCM", "Read Cruise Speed from PCM", "Toyota must set to 1, Honda 3", 0, 3, 1));
-  startToggles->addItem(new CValueControl("SoundVolumeAdjust", "Sound Volume(100%)", "", 5, 200, 5));
-  startToggles->addItem(new CValueControl("SoundVolumeAdjustEngage", "Sound Volume, Engage(10%)", "", 5, 200, 5));
-  startToggles->addItem(new CValueControl("MaxTimeOffroadMin", "Power off time (min)", "", 1, 600, 10));
-  startToggles->addItem(new CValueControl("EnableConnect", "EnableConnect", "Your device may be banned by Comma", 0, 2, 1));
-  startToggles->addItem(new CValueControl("MapboxStyle", "Mapbox Style(0)", "", 0, 2, 1));
-  startToggles->addItem(new CValueControl("RecordRoadCam", "Record Road camera(0)", "1:RoadCam, 2:RoadCam+WideRoadCam", 0, 2, 1));
-  startToggles->addItem(new CValueControl("HDPuse", "Use HDP(CCNC)(0)", "1:While Using APN, 2:Always", 0, 2, 1));
-  startToggles->addItem(new CValueControl("NNFF", "NNFF", "Twilsonco's NNFF(Reboot required)", 0, 1, 1));
-  startToggles->addItem(new CValueControl("NNFFLite", "NNFFLite", "Twilsonco's NNFF-Lite(Reboot required)", 0, 1, 1));
-  startToggles->addItem(new CValueControl("AutoGasSyncSpeed", "Auto update Cruise speed", "", 0, 1, 1));
-  startToggles->addItem(new CValueControl("DisableMinSteerSpeed", "Disable Min.SteerSpeed", "", 0, 1, 1));
-  startToggles->addItem(new CValueControl("DisableDM", "Disable DM", "", 0, 1, 1));
-  startToggles->addItem(new CValueControl("HotspotOnBoot", "Hotspot enabled on boot", "", 0, 1, 1));
-  startToggles->addItem(new CValueControl("SoftwareMenu", "Enable Software Menu", "", 0, 1, 1));
-  startToggles->addItem(new CValueControl("IsLdwsCar", "IsLdwsCar", "", 0, 1, 1));
 
-  //startToggles->addItem(new CValueControl("CarrotCountDownSpeed", "NaviCountDown Speed(10)", "", 0, 200, 5));
-  //startToggles->addItem(new ParamControl("NoLogging", "Disable Logger", "", this));
-  //startToggles->addItem(new ParamControl("LaneChangeNeedTorque", "LaneChange: Need Torque", "", this));
-  //startToggles->addItem(new CValueControl("LaneChangeLaneCheck", "LaneChange: Check lane exist", "(0:No,1:Lane,2:+Edge)", 0, 2, 1));
+  startToggles->addItem(selectCarBtn);
+  startToggles->addItem(new CValueControl("HyundaiCameraSCC", "现代: 摄像头SCC", "1:连接SCC的CAN线到摄像头, 2:同步定速状态, 3:原厂长控", 0, 3, 1));
+  startToggles->addItem(new CValueControl("CanfdHDA2", "CANFD: HDA2 模式", "1:HDA2, 2:HDA2+盲点监测", 0, 2, 1));
+  startToggles->addItem(new CValueControl("EnableRadarTracks", "启用雷达追踪", "1:启用雷达追踪, -1,2:禁用 (始终使用HKG SCC雷达)", -1, 2, 1));
+  startToggles->addItem(new CValueControl("AutoCruiseControl", "自动定速控制", "自动定速启停控制", 0, 3, 1));
+  startToggles->addItem(new CValueControl("CruiseOnDist", "定速: 自动开启距离(0cm)", "当油门/刹车未踩下时，前车靠近自动开启定速", 0, 2500, 50));
+  startToggles->addItem(new CValueControl("AutoEngage", "启动时自动接管控制", "1:方向盘启用, 2:方向盘+定速启用", 0, 2, 1));
+  startToggles->addItem(new CValueControl("AutoGasTokSpeed", "自动加速踏板速度", "油门(加速)踏板启用速度", 0, 200, 5));
+  startToggles->addItem(new CValueControl("SpeedFromPCM", "从PCM读取定速速度", "丰田必须设为1, 本田设为3", 0, 3, 1));
+  startToggles->addItem(new CValueControl("SoundVolumeAdjust", "提示音音量(100%)", "", 5, 200, 5));
+  startToggles->addItem(new CValueControl("SoundVolumeAdjustEngage", "接管提示音音量(10%)", "", 5, 200, 5));
+  startToggles->addItem(new CValueControl("MaxTimeOffroadMin", "熄屏时间 (分钟)", "", 1, 600, 10));
+  startToggles->addItem(new CValueControl("EnableConnect", "启用远程连接", "您的设备可能会被 Comma 封禁", 0, 2, 1));
+  startToggles->addItem(new CValueControl("MapboxStyle", "地图样式(0)", "", 0, 2, 1));
+  startToggles->addItem(new CValueControl("RecordRoadCam", "记录前置摄像头(0)", "1:前置, 2:前置+广角前置", 0, 2, 1));
+  startToggles->addItem(new CValueControl("HDPuse", "使用HDP(CCNC)(0)", "1:使用APN时, 2:始终启用", 0, 2, 1));
+  startToggles->addItem(new CValueControl("NNFF", "NNFF", "Twilsonco的NNFF(需重启)", 0, 1, 1));
+  startToggles->addItem(new CValueControl("NNFFLite", "NNFF精简版", "Twilsonco的NNFF-Lite(需重启)", 0, 1, 1));
+  startToggles->addItem(new CValueControl("AutoGasSyncSpeed", "自动更新定速速度", "", 0, 1, 1));
+  startToggles->addItem(new CValueControl("DisableMinSteerSpeed", "禁用最小转向速度限制", "", 0, 1, 1));
+  startToggles->addItem(new CValueControl("DisableDM", "禁用疲劳监测(DM)", "", 0, 1, 1));
+  startToggles->addItem(new CValueControl("HotspotOnBoot", "开机启用热点", "", 0, 1, 1));
+  startToggles->addItem(new CValueControl("SoftwareMenu", "启用软件菜单", "", 0, 1, 1));
+  startToggles->addItem(new CValueControl("IsLdwsCar", "是否LDWS车型", "", 0, 1, 1));
+
+  //startToggles->addItem(new CValueControl("CarrotCountDownSpeed", "导航倒计时速度(10)", "", 0, 200, 5));
+  //startToggles->addItem(new ParamControl("NoLogging", "禁用日志记录", "", this));
+  //startToggles->addItem(new ParamControl("LaneChangeNeedTorque", "变道: 需要方向盘施力", "", this));
+  //startToggles->addItem(new CValueControl("LaneChangeLaneCheck", "变道: 检查车道存在", "(0:否,1:车道,2:+路肩)", 0, 2, 1));
 
   speedToggles = new ListWidget(this);
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", "CURVE: Lower limit speed(30)", "When you approach a curve, reduce your speed. Minimum speed", 30, 200, 5));
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", "CURVE: Auto Control ratio(100%)", "", 50, 300, 1));
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", "CURVE: Aggressiveness (100%)", "", 50, 300, 1));
-  speedToggles->addItem(new CValueControl("AutoRoadSpeedLimitOffset", "RoadSpeedLimitOffset(-1)", "-1:NotUsed,RoadLimitSpeed+Offset", -1, 100, 1));
-  speedToggles->addItem(new CValueControl("AutoRoadSpeedAdjust", "Auto Roadlimit Speed adjust (50%)", "", -1, 100, 5));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlEnd", "SpeedCamDecelEnd(6s)", "Sets the deceleration completion point. A larger value completes deceleration farther away from the camera.", 3, 20, 1));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlMode", "NaviSpeedControlMode(2)", "0:No slowdown, 1: speed camera, 2: + accident prevention bump, 3: + mobile camera", 0, 3, 1));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedDecelRate", "SpeedCamDecelRatex0.01m/s^2(80)", "Lower number, slows down from a greater distance", 10, 200, 10));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedSafetyFactor", "SpeedCamSafetyFactor(105%)", "", 80, 120, 1));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpTime", "SpeedBumpTimeDistance(1s)", "", 1, 50, 1));
-  speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpSpeed", "SpeedBumpSpeed(35Km/h)", "", 10, 100, 5));
-  speedToggles->addItem(new CValueControl("AutoNaviCountDownMode", "NaviCountDown mode(2)", "0: off, 1:tbt+camera, 2:tbt+camera+bump", 0, 2, 1));
-  speedToggles->addItem(new CValueControl("TurnSpeedControlMode", "Turn Speed control mode(1)", "0: off, 1:vision, 2:vision+route, 3: route", 0, 3, 1));
-  speedToggles->addItem(new CValueControl("MapTurnSpeedFactor", "Map TurnSpeed Factor(100)", "", 50, 300, 5));
-  speedToggles->addItem(new CValueControl("AutoTurnControl", "ATC: Auto turn control(0)", "0:None, 1: lane change, 2: lane change + speed, 3: speed", 0, 3, 1));
-  speedToggles->addItem(new CValueControl("AutoTurnControlSpeedTurn", "ATC: Turn Speed (20)", "0:None, turn speed", 0, 100, 5));
-  speedToggles->addItem(new CValueControl("AutoTurnControlTurnEnd", "ATC: Turn CtrlDistTime (6)", "dist=speed*time", 0, 30, 1));
-  speedToggles->addItem(new CValueControl("AutoTurnMapChange", "ATC Auto Map Change(0)", "", 0, 1, 1));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", "弯道: 最低速度限制(30)", "接近弯道时降低车速, 最低速度", 10, 200, 5));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", "弯道: 自动控制系数(100%)", "", 50, 300, 5));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", "弯道: 激进程度(100%)", "", 50, 300, 5));
+  speedToggles->addItem(new CValueControl("AutoRoadSpeedLimitOffset", "道路限速偏移(-1)", "-1:不启用, 道路限速+偏移", -1, 100, 1));
+  speedToggles->addItem(new CValueControl("AutoRoadSpeedAdjust", "自动调整道路限速(50%)", "", -1, 100, 5));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlEnd", "测速点减速结束点(6秒)", "设置减速完成点, 数值越大减速越提前完成", 3, 20, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlMode", "导航限速控制模式(2)", "0:关闭, 1:测速摄像头, 2:+减速带, 3:+移动测速", 0, 3, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedDecelRate", "测速点减速率x0.01m/s²(80)", "数值越小, 越早开始减速", 10, 200, 10));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedSafetyFactor", "测速点安全系数(105%)", "", 80, 120, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpTime", "减速带时间距离(1秒)", "", 1, 50, 1));
+  speedToggles->addItem(new CValueControl("AutoNaviSpeedBumpSpeed", "减速带通过速度(35Km/h)", "", 10, 100, 5));
+  speedToggles->addItem(new CValueControl("AutoNaviCountDownMode", "导航倒计时模式(2)", "0:关闭, 1:转向+摄像头, 2:转向+摄像头+减速带", 0, 2, 1));
+  speedToggles->addItem(new CValueControl("TurnSpeedControlMode", "转弯速度控制模式(1)", "0:关闭, 1:视觉, 2:视觉+路线, 3:路线", 0, 3, 1));
+  speedToggles->addItem(new CValueControl("MapTurnSpeedFactor", "地图转弯速度系数(100)", "", 50, 300, 5));
+  speedToggles->addItem(new CValueControl("AutoTurnControl", "ATC: 自动转弯控制(0)", "0:无, 1:变道, 2:变道+减速, 3:减速", 0, 3, 1));
+  speedToggles->addItem(new CValueControl("AutoTurnControlSpeedTurn", "ATC: 转弯速度(20)", "0:无, 转弯速度", 0, 100, 5));
+  speedToggles->addItem(new CValueControl("AutoTurnControlTurnEnd", "ATC: 转弯控制距离时间(6)", "距离=速度*时间", 0, 30, 1));
+  speedToggles->addItem(new CValueControl("AutoTurnMapChange", "ATC 自动地图切换(0)", "", 0, 1, 1));
+
 
   toggles_layout->addWidget(cruiseToggles);
   toggles_layout->addWidget(latLongToggles);

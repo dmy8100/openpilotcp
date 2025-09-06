@@ -228,8 +228,21 @@ class CarrotMan:
     self.is_metric = self.params.get_bool("IsMetric")
 
   def get_broadcast_address(self):
+    # 修改为支持PC的多接口检测
     if PC:
-      iface = b'br0'
+        interfaces = ['wlan0', 'eth0', 'enp0s3', 'br0']  # 常见PC接口
+        for iface in interfaces:
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                    ip = fcntl.ioctl(
+                        s.fileno(),
+                        0x8919,  # SIOCGIFBRDADDR
+                        struct.pack('256s', iface.encode('utf-8')[:15])
+                    )[20:24]
+                    return socket.inet_ntoa(ip)
+            except Exception:
+                continue
+        return "255.255.255.255"  # 回退地址
     else:
       iface = b'wlan0'
     try:
@@ -535,7 +548,7 @@ class CarrotMan:
 
   def parse_kisa_data(self, data: bytes):
     result = {}
-    
+
     try:
       decoded = data.decode('utf-8')
     except UnicodeDecodeError:
@@ -551,7 +564,7 @@ class CarrotMan:
         except ValueError:
           result[key] = value
     return result
-  
+
   def kisa_app_thread(self):
     while True:
       try:
@@ -750,7 +763,7 @@ class CarrotMan:
       except Exception as e:
         print(f"carrot_cmd_zmq error: {e}")
         socket.close()
-        time.sleep(1) 
+        time.sleep(1)
         socket, poller = setup_socket()
 
   def recvall(self, sock, n):
