@@ -187,6 +187,9 @@ class CarrotServ:
 
     self.debugText = ""
 
+    self.autoTurnDistOffset = 0
+
+
     self.update_params()
 
   def update_params(self):
@@ -208,6 +211,8 @@ class CarrotServ:
     self.autoCurveSpeedLowerLimit = int(self.params.get("AutoCurveSpeedLowerLimit"))
     self.is_metric = self.params.get_bool("IsMetric")
     self.autoRoadSpeedLimitOffset = self.params.get_int("AutoRoadSpeedLimitOffset")
+    self.autoTurnDistOffset = self.params.get_int("AutoTurnDistOffset")
+
 
 
   def _update_cmd(self):
@@ -556,7 +561,8 @@ class CarrotServ:
     turn_dist_for_speed = self.autoTurnControlTurnEnd * turn_speed / 3.6 # 5
     fork_dist_for_speed = self.autoTurnControlTurnEnd * fork_speed / 3.6 # 5
     stop_dist_for_speed = 5
-    start_fork_dist = np.interp(self.nRoadLimitSpeed, [30, 50, 100], [160, 200, 350])
+    #start_fork_dist = np.interp(self.nRoadLimitSpeed, [30, 50, 100], [160, 200, 350])
+    start_fork_dist = np.interp(self.nRoadLimitSpeed, [30, 50, 100], [160+self.autoTurnDistOffset, 200+self.autoTurnDistOffset, 350+self.autoTurnDistOffset])
     start_turn_dist = np.interp(self.nTBTNextRoadWidth, [5, 10], [43, 60])
     turn_info_mapping = {
         1: {"type": "turn left", "speed": turn_speed, "dist": turn_dist_for_speed, "start": start_fork_dist},
@@ -1043,8 +1049,8 @@ class CarrotServ:
       if nRoadLimitSpeed > 0:
         if nRoadLimitSpeed > 200:
           nRoadLimitSpeed = (nRoadLimitSpeed - 20) / 10
-        elif nRoadLimitSpeed == 120:
-          nRoadLimitSpeed = 30
+        elif nRoadLimitSpeed > 120:
+          nRoadLimitSpeed = 120
       else:
         nRoadLimitSpeed = 30
       #self.nRoadLimitSpeed = nRoadLimitSpeed

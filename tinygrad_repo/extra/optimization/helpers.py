@@ -1,17 +1,15 @@
 # stuff needed to unpack a kernel
 from tinygrad import Variable
-from tinygrad.codegen.opt.kernel import Opt, OptOps
+from tinygrad.opt.kernel import Opt, OptOps
 from tinygrad.uop.ops import UOp, Ops, KernelInfo
 from tinygrad.dtype import dtypes, PtrDType
 from tinygrad.shape.shapetracker import ShapeTracker
 from tinygrad.shape.view import View
-from tinygrad.helpers import getenv
-from tinygrad.engine.realize import get_program
 inf, nan = float('inf'), float('nan')
 UOps = Ops
 
 # kernel unpacker
-from tinygrad.codegen.opt.kernel import Kernel
+from tinygrad.opt.kernel import Kernel
 def ast_str_to_ast(ast_str:str) -> UOp: return eval(ast_str)
 def ast_str_to_lin(ast_str:str, opts=None): return Kernel(ast_str_to_ast(ast_str), opts=opts)
 def kern_str_to_lin(kern_str:str, opts=None):
@@ -28,7 +26,7 @@ from tinygrad.helpers import dedup, DEBUG
 def load_worlds(filter_reduce=True, filter_noimage=True, filter_novariable=True):
   fn = Path(__file__).parent.parent / "datasets/sops.gz"
   ast_strs = dedup(gzip.open(fn).read().decode('utf-8').strip().split("\n"))
-  assert len(ast_strs) >= getenv("MIN_ASTS", 1000), f"dataset size = {len(ast_strs)} is too small"
+  assert len(ast_strs) > 5000, f"dataset size = {len(ast_strs)} is too small"
   if DEBUG >= 1: print(f"loaded {len(ast_strs)=} before filters")
   if filter_reduce: ast_strs = [x for x in ast_strs if "REDUCE_AXIS" in x]
   if filter_noimage: ast_strs = [x for x in ast_strs if "dtypes.image" not in x]
@@ -103,7 +101,7 @@ def lin_to_feats(lin:Kernel, use_sts=True):
   return ret
 
 from tinygrad.device import Device, Buffer
-from tinygrad.codegen.opt.search import _ensure_buffer_alloc, _time_program
+from tinygrad.opt.search import _ensure_buffer_alloc, _time_program
 from tinygrad.helpers import to_function_name, CACHELEVEL, diskcache_get, diskcache_put
 
 def time_linearizer(lin:Kernel, rawbufs:list[Buffer], allow_test_size=True, max_global_size=65536, cnt=3, disable_cache=False, clear_l2=False) -> float:  # noqa: E501
@@ -116,7 +114,7 @@ def time_linearizer(lin:Kernel, rawbufs:list[Buffer], allow_test_size=True, max_
 
   rawbufs = _ensure_buffer_alloc(rawbufs)
   var_vals: dict[Variable, int] = {k:int(k.vmax+k.vmin)//2 for k in lin.ast.variables()}
-  p = get_program(lin.get_optimized_ast(), lin.opts)
+  p = lin.to_program()
   tms = _time_program(p, dev.compiler.compile(p.src), var_vals, rawbufs,
                       max_global_size=max_global_size if allow_test_size else None, clear_l2=clear_l2, cnt=cnt, name=to_function_name(lin.name))
 

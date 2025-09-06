@@ -2,9 +2,10 @@
 #!POPCORN gpu A100
 # not a stable API, but works
 
-import torch
+import torch, functools
 from tinygrad import Tensor, TinyJit, Device
-from tinygrad.helpers import Context, OSX
+from tinygrad.engine.realize import CompiledRunner
+from tinygrad.helpers import get_single_element, Context, OSX
 from tinygrad.dtype import _from_torch_dtype
 
 @TinyJit

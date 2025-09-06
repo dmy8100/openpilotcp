@@ -60,5 +60,3 @@ comgr_*
 site/
 profile_stats
 *.log
-target
-.mypy_cache
