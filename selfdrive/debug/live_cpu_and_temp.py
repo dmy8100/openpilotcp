@@ -38,8 +38,8 @@ if __name__ == "__main__":
 
   last_temp = 0.0
   last_mem = 0.0
-  total_times = [0.]*8
-  busy_times = [0.]*8
+  total_times = []  # 动态列表，不再硬编码
+  busy_times = []   # 动态列表，不再硬编码
 
   prev_proclog: capnp._DynamicStructReader | None = None
   prev_proclog_t: int | None = None
@@ -54,20 +54,31 @@ if __name__ == "__main__":
 
     if sm.updated['procLog']:
       m = sm['procLog']
+      # 根据实际CPU核心数动态创建列表
+      num_cores = len(m.cpuTimes)
+      cores = [0.] * num_cores
+      total_times_new = [0.] * num_cores
+      busy_times_new = [0.] * num_cores
 
-      cores = [0.]*8
-      total_times_new = [0.]*8
-      busy_times_new = [0.]*8
+      # 如果是第一次运行或核心数发生变化，重新初始化历史数据
+      if len(total_times) != num_cores:
+        total_times = [0.] * num_cores
+        busy_times = [0.] * num_cores
 
       for c in m.cpuTimes:
         n = c.cpuNum
-        total_times_new[n] = cputime_total(c)
-        busy_times_new[n] = cputime_busy(c)
-
-      for n in range(8):
-        t_busy = busy_times_new[n] - busy_times[n]
-        t_total = total_times_new[n] - total_times[n]
-        cores[n] = t_busy / t_total
+        if n < num_cores:  # 安全检查，确保索引不越界
+          total_times_new[n] = cputime_total(c)
+          busy_times_new[n] = cputime_busy(c)
+      # 计算CPU使用率，只处理有效的核心
+      for n in range(min(num_cores, len(total_times), len(busy_times))):
+        if total_times[n] > 0:  # 避免除零错误
+          t_busy = busy_times_new[n] - busy_times[n]
+          t_total = total_times_new[n] - total_times[n]
+          if t_total > 0:
+            cores[n] = t_busy / t_total
+          else:
+            cores[n] = 0.0
 
       total_times = total_times_new[:]
       busy_times = busy_times_new[:]
@@ -104,3 +115,4 @@ if __name__ == "__main__":
 
       prev_proclog = m
       prev_proclog_t = sm.logMonoTime['procLog']
+

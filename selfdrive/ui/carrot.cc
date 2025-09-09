@@ -1065,10 +1065,10 @@ protected:
         active_carrot = 2;
         nGoPosDist = 500000;
         nGoPosTime = 4 * 60 * 60;
-        szSdiDescr = "어린이 보호구역(스쿨존 시작 구간)";
+        szSdiDescr = "儿童保护区域（学校区域开始）";
         xTurnInfo = 1;
         xDistToTurn = 1000;
-        szPosRoadName = "구문천 1길 17";
+        szPosRoadName = "九门川1街17号";
 #endif
 
         //if (active_carrot <= 1) return;
@@ -1148,7 +1148,7 @@ protected:
             local->tm_min += remaining_minutes;
             mktime(local);
             bool is_kor = s->language == "main_ko";
-            sprintf(str, "%s: %.1f%s(%02d:%02d)", (is_kor)?"到达":"预计到达时间", (float)nGoPosTime / 60., (is_kor)?"分钟":"分钟", local->tm_hour, local->tm_min);
+            sprintf(str, "%s: %.1f%s(%02d:%02d)", (is_kor)?"到达":"ETA", (float)nGoPosTime / 60., (is_kor)?"分钟":"分钟", local->tm_hour, local->tm_min);
             ui_draw_text(s, tbt_x + 190, tbt_y + 80, str, 50, COLOR_WHITE, BOLD);
             sprintf(str, "%.1f%s", nGoPosDist / 1000. * ((s->scene.is_metric)?1:KM_TO_MILE), (s->scene.is_metric) ? "km" : "英里");
             ui_draw_text(s, tbt_x + 190 + 120, tbt_y + 130, str, 50, COLOR_WHITE, BOLD);
@@ -2048,6 +2048,7 @@ public:
                 }
             }
         }
+	makeDeviceInfo(s);
 	  }
     void drawRadarInfo(UIState* s) {
         char str[128];
@@ -2163,13 +2164,14 @@ public:
     int     disp_timer = 0;
     float cpuTemp = 0.0f;
     float cpuUsage = 0.0f;
+    float gpuUsage = 0.0f;
     int   memoryUsage = 0;
     float freeSpace = 0.0f;
     float voltage = 0.0f;
     void drawHud(UIState* s) {
         int show_device_state = params.getInt("ShowDeviceState");
         blink_timer = (blink_timer + 1) % 16;
-        disp_timer = (disp_timer + 1) % 64;
+        disp_timer = (disp_timer + 1) % 240;
         nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM);
 
         int x = 140;// 120;
@@ -2250,7 +2252,7 @@ public:
         const SubMaster& sm = *(s->sm);
 
         // draw gap info
-        char driving_mode_str[32] = "연비";
+        char driving_mode_str[32] = "经济";
         int driving_mode = myDrivingMode;// params.getInt("MyDrivingMode");
         NVGcolor mode_color = COLOR_GREEN_ALPHA(210);
         NVGcolor text_color = COLOR_WHITE;
@@ -2288,7 +2290,7 @@ public:
         //float ddx = 70 / 4.;
         float ddy = 80 / 4.;
 #ifdef __UI_TEST
-        gap = 3;
+        gap = 4;
 #endif
         for (int i = 0; i < gap; i++) {
             //ui_fill_rect(s->vg, { (int)(dx + i * ddx), (int)dy, (int)ddx - 2, 48 }, COLOR_GREEN_ALPHA(180), 4, 3);
@@ -2375,18 +2377,30 @@ public:
             dy = by - 200;
             mode_color = COLOR_GREEN_ALPHA(190);
             ui_fill_rect(s->vg, { dx - 65, dy - 38, 130, 90 }, (cpuTemp>80 && blink_timer<=8)?COLOR_RED : mode_color, 15, 2);
+            if (disp_timer < 120) {
             ui_draw_text(s, dx, dy-5, "CPU", 25, COLOR_WHITE, BOLD);
             sprintf(str, "%.0f\u00B0C", cpuTemp);
             ui_draw_text(s, dx, dy + 40, str, 40, COLOR_WHITE, BOLD);
+            } else {
+                ui_draw_text(s, dx, dy-5, "CPU", 25, COLOR_WHITE, BOLD);
+                sprintf(str, "%.0f%%", cpuUsage);
+                ui_draw_text(s, dx, dy + 40, str, 40, COLOR_WHITE, BOLD);
+            }
 
             dx += 150;
             ui_fill_rect(s->vg, { dx - 65, dy - 38, 130, 90 }, (memoryUsage > 85 && blink_timer <= 8) ? COLOR_RED : mode_color, 15, 2);
+            if (disp_timer < 120) {
+                ui_draw_text(s, dx, dy-5, "GPU", 25, COLOR_WHITE, BOLD);
+                sprintf(str, "%.0f%%", gpuUsage);
+                ui_draw_text(s, dx, dy + 40, str, 40, COLOR_WHITE, BOLD);
+            } else {
             ui_draw_text(s, dx, dy-5, "MEM", 25, COLOR_WHITE, BOLD);
             sprintf(str, "%d%%", memoryUsage);
             ui_draw_text(s, dx, dy + 40, str, 40, COLOR_WHITE, BOLD);
+            }
 
             dx += 150;
-            if (disp_timer < 32) {
+            if (disp_timer < 120) {
               ui_fill_rect(s->vg, { dx - 65, dy - 38, 130, 90 }, mode_color, 15, 2);
               ui_draw_text(s, dx, dy - 5, "DISK", 25, COLOR_WHITE, BOLD);
               sprintf(str, "%.0f%%", 100 - freeSpace);
@@ -2536,29 +2550,29 @@ public:
       ui_draw_text(s, bx + dw, by + 70, get_tpms_text(rr), 40, get_tpms_color(rr), BOLD);
     }
     void makeDeviceInfo(const UIState* s) {
+
         SubMaster& sm = *(s->sm);
         auto deviceState = sm["deviceState"].getDeviceState();
         freeSpace = deviceState.getFreeSpacePercent();
         memoryUsage = deviceState.getMemoryUsagePercent();
         const auto cpuTempC = deviceState.getCpuTempC();
         const auto cpuUsagePercent = deviceState.getCpuUsagePercent();
-        int   size = sizeof(cpuTempC) / sizeof(cpuTempC[0]);
-        if (size > 0) {
-            for (int i = 0; i < size; i++) {
+        gpuUsage = deviceState.getGpuUsagePercent();
+        cpuTemp = 0.0f;
+        if (cpuTempC.size() > 0) {
+            for (int i = 0; i < cpuTempC.size(); i++) {
                 cpuTemp += cpuTempC[i];
             }
-            cpuTemp /= static_cast<float>(size);
+            cpuTemp /= static_cast<float>(cpuTempC.size());
         }
-        size = sizeof(cpuUsagePercent) / sizeof(cpuUsagePercent[0]);
-        if (size > 0) {
-            int cpu_size = 0;
-            for (cpu_size = 0; cpu_size < size; cpu_size++) {
-                if (cpuUsagePercent[cpu_size] <= 0) break;
-                cpuUsage += cpuUsagePercent[cpu_size];
+        cpuUsage = 0.0f;
+        if (cpuUsagePercent.size() > 0) {
+            float total_usage = 0.0f;
+            for (int i = 0; i < cpuUsagePercent.size(); i++) {
+                total_usage += cpuUsagePercent[i];
             }
-            if (cpu_size > 0) cpuUsage /= cpu_size;
+            cpuUsage = total_usage / cpuUsagePercent.size();
         }
-
         auto peripheralState = sm["peripheralState"].getPeripheralState();
         voltage = peripheralState.getVoltage() / 1000.0;
     }
@@ -3009,3 +3023,4 @@ void ui_resize(UIState *s, int width, int height) {
 }
 
 #include "selfdrive/ui/carrot.moc"
+
