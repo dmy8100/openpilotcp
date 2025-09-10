@@ -93,21 +93,10 @@ class Pc(HardwareBase):
     cpu_zones = []
     gpu_zones = []
 
-    # 扫描CPU热区
-    for i in range(10):
-        zone_path = f'/sys/class/thermal/thermal_zone{i}'
-        if os.path.exists(f'{zone_path}/temp'):
-            try:
-                with open(f'{zone_path}/type') as f:
-                    zone_type = f.read().strip()
-                with open(f'{zone_path}/temp') as f:
-                    temp = int(f.read().strip())  # 直接读取原始值，由 ThermalZone 类处理转换
-                cpu_zones.append(ThermalZone(zone_type, temp))
-            except:
-                cpu_zones.append(ThermalZone(f'thermal_zone{i}'))
+
 
     # 尝试从 hwmon 设备读取温度数据
-    hwmon_thermal_paths = glob.glob('/sys/class/hwmon/hwmon*/temp*_input')
+    hwmon_thermal_paths = glob.glob('/sys/class/hwmon/hwmon2/temp1_input')
     for path in hwmon_thermal_paths:
         try:
             with open(path) as f:
@@ -123,34 +112,17 @@ class Pc(HardwareBase):
             zone = ThermalZone(zone_type)
             zone.scale = 1  # 温度值已经转换为摄氏度，不需要再除以 scale
             zone.zone_number = -1  # 禁用自动读取
-            zone.read = lambda: temp  # 覆盖 read 方法，直接返回温度值
+            zone.read = lambda path=path: int(open(path).read().strip()) // 1000  # 每次调用时重新读取温度值
             cpu_zones.append(zone)
         except:
             pass
-
-    # 尝试添加GPU热区（基于您的系统信息）
-    # 虽然您的 /sys/class/drm/card0/device/gpu_busy_percent 显示0
-    # 但可能存在GPU温度传感器
-    gpu_thermal_paths = [
-        '/sys/class/drm/card0/device/hwmon/hwmon*/temp1_input',
-        '/sys/class/hwmon/hwmon*/temp*_label'  # 查找标记为GPU的温度传感器
-    ]
-
-    for pattern in gpu_thermal_paths:
-        for path in glob.glob(pattern):
-            try:
-                # 检查是否是GPU相关的温度传感器
-                if 'gpu' in path.lower() or 'card' in path.lower():
-                    gpu_zones.append(ThermalZone(f'gpu_thermal_{len(gpu_zones)}'))
-            except:
-                pass
 
     if not cpu_zones:
         cpu_zones.append(ThermalZone('thermal_zone0'))
 
     return ThermalConfig(
         cpu=cpu_zones,
-        gpu=gpu_zones if gpu_zones else None,  # 只有找到GPU热区才添加
+        gpu=None,  # 移除GPU热区检测
         memory=None,  # PC环境通常没有独立的内存温度传感器
         pmic=None     # PC环境没有PMIC
     )
