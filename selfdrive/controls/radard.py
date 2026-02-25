@@ -498,7 +498,7 @@ class RadarD:
     valid_ids = set()
     for pt in rr.points:
       track_id = pt.trackId
-      valid_ids.add(track_id)      
+      valid_ids.add(track_id)
 
       if track_id not in self.tracks:
         self.tracks[track_id] = Track(track_id)
@@ -573,8 +573,9 @@ class RadarD:
 
     if (track is None or lead_msg.prob < .6) and track_scc is not None and track_scc.cnt > 2:
       #if self.enable_radar_tracks in [-1, 2] or model_v_ego < 5 or track_scc.vLead < 5.0:
-      if self.enable_radar_tracks == -1 or (self.enable_radar_tracks >= 2 and track_scc.vLead < 5.0):
-        track = track_scc      
+      #if self.enable_radar_tracks in [-1, 2] or track_scc.vLead < 5.0:
+      if self.enable_radar_tracks in [-1, 2]:
+        track = track_scc
 
     lead_dict = {'status': False}
     radar = False
@@ -610,7 +611,7 @@ class RadarD:
       self.radar_state.leadLeft = {'status': False}
       self.radar_state.leadRight = {'status': False}
       return
-    
+
     left_list, right_list, center_list, cutin_list = [], [], [], []
     for c in tracks.values():
       y_rel_neg = - c.yRel
@@ -661,7 +662,7 @@ class RadarD:
         key=lambda d: d['dRel'],
         default={'status': False}
     )
-   
+
     self.leadTwo = None
     if self.lane_line_available:
       self.leadCenter = min(
@@ -760,7 +761,7 @@ class RadarD:
       self._corner_state[side] = 0    # maintain
 
     return self._corner_state[side]
- 
+
   def corner_radar(self, CS, lead_dict):
     ENTER_LAT = 2.2
     KEEP_LAT  = 2.0
@@ -802,7 +803,7 @@ class RadarD:
       lat_dist, long_dist = +left_lat, CS.leftLongDist
     else:
       lat_dist, long_dist = -right_lat, CS.rightLongDist
-    
+
     if lead_dict['status']:
       if lead_dict['dRel'] > long_dist:
         lead_dict['dRel'] = long_dist
