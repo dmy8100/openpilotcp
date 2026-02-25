@@ -165,16 +165,16 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
 
   offset_vision_dist = float(lead.x[0] - RADAR_TO_CAMERA)
 
-  # distance gates
-  max_vision_dist  = max(offset_vision_dist * 1.25, 5.0)
-  min_vision_dist  = max(offset_vision_dist * 0.80, 1.0)
-  max_vision_dist2 = max(offset_vision_dist * 1.45, 5.0)
+  # distance gates - 优化置信度范围
+  max_vision_dist  = max(offset_vision_dist * 1.30, 5.0)  # 1.25 -> 1.30 稍微放宽
+  min_vision_dist  = max(offset_vision_dist * 0.75, 1.0)  # 0.80 -> 0.75 稍微放宽
+  max_vision_dist2 = max(offset_vision_dist * 1.50, 5.0)  # 1.45 -> 1.50 cut-in场景放宽
   min_vision_dist2 = 1.5
 
-  # velocity tolerance (same intent)
-  vel_tol = float(max(lead.v[0] * np.interp(lead.prob, [0.8, 0.98], [0.3, 0.5]), 5.0))
+  # velocity tolerance (same intent) - 优化速度容差
+  vel_tol = float(max(lead.v[0] * np.interp(lead.prob, [0.75, 0.98], [0.25, 0.55]), 4.0))  # 调整插值范围和最小值
   # hard guardrail for moving-bias (prevents absurd match)
-  vel_guard = max(vel_tol * 3.0, 20.0)
+  vel_guard = max(vel_tol * 3.5, 18.0)  # 3.0 -> 3.5, 20.0 -> 18.0
 
   def dist_sane(t: Track, wide: bool = False) -> bool:
     if wide:
@@ -182,7 +182,7 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
     return (min_vision_dist < t.dRel < max_vision_dist)
 
   def y_sane(t: Track, wide: bool = False) -> bool:
-    lim = 4.0 if wide else 2.0
+    lim = 4.5 if wide else 2.2  # 4.0 -> 4.5, 2.0 -> 2.2 稍微放宽横向容差
     return abs(t.yRel + float(lead.y[0])) < lim
 
   def vel_sane(t: Track) -> bool:
@@ -211,7 +211,7 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
     # If in-lane probability exists (it does in your Track), use it as safety.
     # When it's clearly not in our lane, don't use moving-bias.
     # (This line is intentionally mild; you can tune 0.2~0.5)
-    if hasattr(t, "dPath") and (t.in_lane_prob < 0.25):
+    if hasattr(t, "dPath") and (t.in_lane_prob < 0.20):  # 0.25 -> 0.20 稍微放宽车道内概率要求
       return False
 
     return True
@@ -251,7 +251,7 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
       extra_track, extra_score = t, s2
 
   # score floor
-  if first_track is None or first_score < 1e-4:
+  if first_track is None or first_score < 5e-5:  # 1e-4 -> 5e-5 降低分数门槛
     return None
 
   # ---- selection policy (same logic, cleaner & safer) ----
@@ -260,11 +260,11 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
   # A) normal match
   if dist_sane(first_track) and vel_sane(first_track):
     if y_sane(first_track):
-      if lead.prob > 0.5:
+      if lead.prob > 0.45:  # 0.5 -> 0.45 降低置信度要求
         best_track = first_track
-      elif lead.prob > 0.4 and first_track.selected_count > 0:
+      elif lead.prob > 0.35 and first_track.selected_count > 0:  # 0.4 -> 0.35
         best_track = first_track
-    elif lead.prob > 0.6:
+    elif lead.prob > 0.55:  # 0.6 -> 0.55
       best_track = first_track
 
   # B) stopped-car-like (only if not chosen yet)
@@ -280,7 +280,7 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
         best_track = first_track
 
   # C) cut-in wide matching (only if not chosen yet)
-  if best_track is None and offset_vision_dist < 90.0 and lead.prob > 0.65:
+  if best_track is None and offset_vision_dist < 100.0 and lead.prob > 0.60:  # 90.0 -> 100.0, 0.65 -> 0.60
     # wide-y winner first (cut-in)
     if (extra_track is not None and extra_score > first_score and
         dist_sane(extra_track, wide=True) and vel_sane(extra_track) and y_sane(extra_track, wide=True)):
@@ -290,7 +290,7 @@ def match_vision_to_track(v_ego: float, lead: capnp._DynamicStructReader, tracks
     elif dist_sane(first_track, wide=True) and vel_sane(first_track) and y_sane(first_track, wide=True):
       best_track = first_track
 
-    elif (second_track is not None and second_score > 1e-4 and
+    elif (second_track is not None and second_score > 5e-5 and  # 1e-4 -> 5e-5
           dist_sane(second_track, wide=True) and vel_sane(second_track) and y_sane(second_track, wide=True)):
       best_track = second_track
 
@@ -566,12 +566,12 @@ class RadarD:
       track_scc = tracks.pop(0, None)
 
     # Determine leads, this is where the essential logic happens
-    if len(tracks) > 0 and ready and lead_msg.prob > .4:
+    if len(tracks) > 0 and ready and lead_msg.prob > .35:  # .4 -> .35 降低匹配启动阈值
       track = match_vision_to_track(v_ego, lead_msg, tracks)
     else:
       track = None
 
-    if (track is None or lead_msg.prob < .6) and track_scc is not None and track_scc.cnt > 2:
+    if (track is None or lead_msg.prob < .55) and track_scc is not None and track_scc.cnt > 2:  # .6 -> .55
       #if self.enable_radar_tracks in [-1, 2] or model_v_ego < 5 or track_scc.vLead < 5.0:
       #if self.enable_radar_tracks in [-1, 2] or track_scc.vLead < 5.0:
       if self.enable_radar_tracks in [-1, 2]:
@@ -582,7 +582,7 @@ class RadarD:
     if track is not None:
       lead_dict = track.get_RadarState(lead_msg.prob, self.vision_tracks[0].yRel)
       radar = True
-    elif (track is None) and ready and (lead_msg.prob > .5):
+    elif (track is None) and ready and (lead_msg.prob > .45):  # .5 -> .45 降低纯视觉模式阈值
         lead_dict = self.vision_tracks[index].get_lead(md)
 
     if self.enable_corner_radar > 1:
@@ -616,7 +616,7 @@ class RadarD:
     for c in tracks.values():
       y_rel_neg = - c.yRel
       # center
-      if c.in_lane_prob > 0.3:
+      if c.in_lane_prob > 0.25:  # 0.3 -> 0.25 降低车道内概率要求
         if c.cnt > 3:
           ld = c.get_RadarState(lead_msg.prob, float(-lead_msg.y[0]))
           ld['modelProb'] = 0.01
@@ -625,7 +625,7 @@ class RadarD:
       # left/right
       elif y_rel_neg < 0: #left_lane_y:
         ld = c.get_RadarState(0, 0)
-        if self.lane_line_available and c.in_lane_prob_future > 0.1 and c.cnt > int(2.0/DT_MDL):
+        if self.lane_line_available and c.in_lane_prob_future > 0.08 and c.cnt > int(2.0/DT_MDL):  # 0.1 -> 0.08
           if c.cut_in_count > int(0.1/DT_MDL):
             ld['modelProb'] = 0.03
             cutin_list.append(ld)
@@ -633,7 +633,7 @@ class RadarD:
         left_list.append(ld)
       else:
         ld = c.get_RadarState(0, 0)
-        if self.lane_line_available and c.in_lane_prob_future > 0.1 and c.cnt > int(2.0/DT_MDL):
+        if self.lane_line_available and c.in_lane_prob_future > 0.08 and c.cnt > int(2.0/DT_MDL):  # 0.1 -> 0.08
           if c.cut_in_count > int(0.1/DT_MDL):
             ld['modelProb'] = 0.03
             cutin_list.append(ld)
@@ -653,12 +653,12 @@ class RadarD:
     )
 
     self.radar_state.leadLeft  = min(
-        (ld for ld in left_list if ld['dRel'] > 5 and abs(ld['dPath']) < 3.5),
+        (ld for ld in left_list if ld['dRel'] > 5 and abs(ld['dPath']) < 3.8),  # 3.5 -> 3.8
         key=lambda d: d['dRel'],
         default={'status': False}
     )
     self.radar_state.leadRight = min(
-        (ld for ld in right_list if ld['dRel'] > 5 and abs(ld['dPath']) < 3.5),
+        (ld for ld in right_list if ld['dRel'] > 5 and abs(ld['dPath']) < 3.8),  # 3.5 -> 3.8
         key=lambda d: d['dRel'],
         default={'status': False}
     )
@@ -687,7 +687,7 @@ class RadarD:
 
     def _ok(ld):
         return (ld.get('vLead', 0) > 2 and
-                abs(ld.get('dPath', 0)) < 4.2 and
+                abs(ld.get('dPath', 0)) < 4.5 and  # 4.2 -> 4.5
                 ld.get('dRel', 0) > 2)
 
     def _pick_two_with_gap(cands, min_gap=5.0):
