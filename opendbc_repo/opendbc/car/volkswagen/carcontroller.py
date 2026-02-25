@@ -48,8 +48,23 @@ class CarController(CarControllerBase):
         self.hca_frame_timer_running += self.CCP.STEER_STEP
         if self.apply_torque_last == apply_torque:
           self.hca_frame_same_torque += self.CCP.STEER_STEP
-          if self.hca_frame_same_torque > self.CCP.STEER_TIME_STUCK_TORQUE / DT_CTRL:
-            apply_torque -= (1, -1)[apply_torque < 0]
+          # Different timeout based on torque level for optimal cornering performance
+          # At max torque: use long timeout (300s) to avoid torque reduction during sustained turns
+          # Below max torque: use short timeout (1.9s) to actively boost torque in corners
+          if abs(apply_torque) >= self.CCP.STEER_MAX:
+            stuck_timeout = 300.0 / DT_CTRL  # 300 seconds (5 minutes) - avoid reduction
+          else:
+            stuck_timeout = self.CCP.STEER_TIME_STUCK_TORQUE / DT_CTRL  # 1.9 seconds - boost torque
+          if self.hca_frame_same_torque > stuck_timeout:
+            # Reset EPS timer by modifying torque
+            # Only reduce torque if at maximum (300), otherwise increase for better response
+            if abs(apply_torque) >= self.CCP.STEER_MAX:
+              # At max torque: reduce slightly to reset timer
+              reduction = 1 if abs(apply_torque) > 100 else 0
+              apply_torque -= reduction if apply_torque > 0 else -reduction
+            else:
+              # Below max torque: increase slightly to improve steering response
+              apply_torque += 1 if apply_torque > 0 else -1
             self.hca_frame_same_torque = 0
         else:
           self.hca_frame_same_torque = 0
