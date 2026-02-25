@@ -1107,23 +1107,43 @@
     <name>DrawCarrot</name>
     <message>
         <source>ECO</source>
-        <translation>经济</translation>
+        <translation type="vanished">经济</translation>
     </message>
     <message>
         <source>SAFE</source>
-        <translation>安全</translation>
+        <translation type="vanished">安全</translation>
     </message>
     <message>
         <source>NORM</source>
-        <translation>标准</translation>
+        <translation type="vanished">标准</translation>
     </message>
     <message>
         <source>FAST</source>
-        <translation>激进</translation>
+        <translation type="vanished">激进</translation>
     </message>
     <message>
         <source>ERRM</source>
-        <translation>错误</translation>
+        <translation type="vanished">错误</translation>
+    </message>
+    <message>
+        <source>经 济</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>安 全</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>标 准</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>运 动</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>错 误</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

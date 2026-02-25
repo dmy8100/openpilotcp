@@ -1081,19 +1081,19 @@
     </message>
     <message>
         <source>ECO</source>
-        <translation>연비</translation>
+        <translation type="vanished">연비</translation>
     </message>
     <message>
         <source>SAFE</source>
-        <translation>안전</translation>
+        <translation type="vanished">안전</translation>
     </message>
     <message>
         <source>NORM</source>
-        <translation>일반</translation>
+        <translation type="vanished">일반</translation>
     </message>
     <message>
         <source>FAST</source>
-        <translation>고속</translation>
+        <translation type="vanished">고속</translation>
     </message>
     <message>
         <source>Start</source>
@@ -1128,7 +1128,23 @@
         <translation type="vanished">레인리스</translation>
     </message>
     <message>
-        <source>ERRM</source>
+        <source>经 济</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>安 全</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>标 准</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>运 动</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>错 误</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1064,23 +1064,23 @@
 <context>
     <name>DrawCarrot</name>
     <message>
-        <source>ECO</source>
+        <source>经 济</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>SAFE</source>
+        <source>安 全</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>NORM</source>
+        <source>标 准</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>FAST</source>
+        <source>运 动</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>ERRM</source>
+        <source>错 误</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
