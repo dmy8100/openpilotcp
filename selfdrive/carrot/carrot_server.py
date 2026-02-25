@@ -38,7 +38,7 @@ import ssl
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DEFAULT_SETTINGS_PATH = "/data/openpilot/selfdrive/carrot_settings.json"
+DEFAULT_SETTINGS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "carrot_settings.json")
 
 WEB_DIR = os.path.join(BASE_DIR, "web")
 

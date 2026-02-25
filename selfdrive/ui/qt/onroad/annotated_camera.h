@@ -26,6 +26,7 @@ private:
 
   int skip_frame_count = 0;
   bool wide_cam_requested = false;
+  bool driver_cam_requested = false;
 
 protected:
   void paintGL() override;

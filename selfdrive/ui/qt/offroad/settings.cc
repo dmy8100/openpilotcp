@@ -411,7 +411,7 @@ void DevicePanel::calibration() {
   if (!uiState()->engaged()) {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration?"), tr("ReCalibration"), this)) {
       if (!uiState()->engaged()) {
-        std::thread worker(execAndReboot, "cd /data/params/d_tmp;  rm -f CalibrationParams");
+        std::thread worker(execAndReboot, "rm -f /home/my/.comma/params/d/CalibrationParams");
         worker.detach();
       }
     }
@@ -704,7 +704,7 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   latLongToggles->addItem(new CValueControl("SteerActuatorDelay", tr("LAT:SteerActuatorDelay(30)"), tr("x0.01, 0:LiveDelay"), 0, 100, 1));
   latLongToggles->addItem(new CValueControl("LatSmoothSec", tr("LAT:LatSmoothSec(13)"), tr("x0.01"), 1, 30, 1));
   latLongToggles->addItem(new CValueControl("LateralTorqueCustom", tr("LAT: TorqueCustom(0)"), "", 0, 2, 1));
-  latLongToggles->addItem(new CValueControl("LateralTorqueAccelFactor", tr("LAT: TorqueAccelFactor(2500)"), "", 1000, 6000, 10));
+  latLongToggles->addItem(new CValueControl("LateralTorqueAccelFactor", tr("LAT: TorqueAccelFactor(2500)"), "", 1000, 6000, 100));
   latLongToggles->addItem(new CValueControl("LateralTorqueFriction", tr("LAT: TorqueFriction(100)"), "", 0, 1000, 10));
   latLongToggles->addItem(new CValueControl("CustomSteerMax", tr("LAT: CustomSteerMax(0)"), "", 0, 30000, 5));
   latLongToggles->addItem(new CValueControl("CustomSteerDeltaUp", tr("LAT: CustomSteerDeltaUp(0)"), "", 0, 50, 1));
@@ -854,9 +854,9 @@ CarrotPanel::CarrotPanel(QWidget* parent) : QWidget(parent) {
   //startToggles->addItem(new CValueControl("LaneChangeLaneCheck", "LaneChange: Check lane exist", "(0:No,1:Lane,2:+Edge)", 0, 2, 1));
 
   speedToggles = new ListWidget(this);
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", tr("CURVE: Lower limit speed(30)"), tr("When you approach a curve, reduce your speed. Minimum speed"), 30, 200, 5));
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", tr("CURVE: Auto Control ratio(100%)"), "", 50, 300, 1));
-  speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", tr("CURVE: Aggressiveness (100%)"), "", 50, 300, 1));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedLowerLimit", tr("CURVE: Lower limit speed(30)"), tr("When you approach a curve, reduce your speed. Minimum speed"), 10, 200, 5));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedFactor", tr("CURVE: Auto Control ratio(100%)"), "", 50, 300, 5));
+  speedToggles->addItem(new CValueControl("AutoCurveSpeedAggressiveness", tr("CURVE: Aggressiveness (100%)"), "", 50, 300, 5));
   speedToggles->addItem(new CValueControl("AutoRoadSpeedLimitOffset", tr("RoadSpeedLimitOffset(-1)"), tr("-1:NotUsed,RoadLimitSpeed+Offset"), -1, 100, 1));
   speedToggles->addItem(new CValueControl("AutoRoadSpeedAdjust", tr("Auto Roadlimit Speed adjust (50%)"), "", -1, 100, 5));
   speedToggles->addItem(new CValueControl("AutoNaviSpeedCtrlEnd", tr("SpeedCamDecelEnd(6s)"), tr("Sets the deceleration completion point. A larger value completes deceleration farther away from the camera."), 3, 20, 1));

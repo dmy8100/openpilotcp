@@ -2,12 +2,14 @@
 
 void setMainWindow(QWidget *w) {
   const float scale = util::getenv("SCALE", 1.0f);
-  const QSize sz = QGuiApplication::primaryScreen()->size();
+  //const QSize sz = QGuiApplication::primaryScreen()->size();
 
-  if (Hardware::PC() && scale == 1.0 && !(sz - DEVICE_SCREEN_SIZE).isValid()) {
-    w->setMinimumSize(QSize(640, 480)); // allow resize smaller than fullscreen
+  if (Hardware::PC()) {
+    const QSize DEFAULT_WINDOW_SIZE(1790, 1000);
+    w->setMinimumSize(QSize(640, 480));
     w->setMaximumSize(DEVICE_SCREEN_SIZE);
-    w->resize(sz);
+    w->resize(DEFAULT_WINDOW_SIZE); // 设置初始大小
+    w->move(770, 558); // 将窗口向右移动560像素
   } else {
     w->setFixedSize(DEVICE_SCREEN_SIZE * scale);
   }

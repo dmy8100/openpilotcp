@@ -771,7 +771,8 @@ class CarrotMan:
       self.save_toggle_values()
       try:
         #with open("/data/backup_params.json", "rb") as file:
-        with open("/data/toggle_values.json", "rb") as file:
+        toggle_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'toggle_values.json')
+        with open(toggle_file_path, 'rb') as file:
           ftp.storbinary(f'STOR toggles-{current_time}.json', file)
       except Exception as e:
         print(f"ftp params sending error...: {e}")
@@ -796,7 +797,7 @@ class CarrotMan:
       import openpilot.selfdrive.frogpilot.fleetmanager.helpers as fleet
 
       toggle_values = fleet.get_all_toggle_values()
-      file_path = os.path.join('/data', 'toggle_values.json')
+      file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'toggle_values.json')
       with open(file_path, 'w') as file:
         json.dump(toggle_values, file, indent=2)
     except Exception as e:

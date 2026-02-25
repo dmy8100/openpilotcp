@@ -24,7 +24,7 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget *par
 
   experimental_btn = new ExperimentalButton(this);
   main_layout->addWidget(experimental_btn, 0, Qt::AlignTop | Qt::AlignRight);
-  
+
   record_timer = std::make_shared<QTimer>();
 	QObject::connect(record_timer.get(), &QTimer::timeout, [=]() {
     if(recorder) {
@@ -35,7 +35,7 @@ AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget *par
 
 	recorder = new ScreenRecoder(this);
 	main_layout->addWidget(recorder, 0, Qt::AlignBottom | Qt::AlignRight);
-  
+
 }
 
 void AnnotatedCameraWidget::updateState(const UIState &s) {
@@ -88,6 +88,18 @@ mat4 AnnotatedCameraWidget::calcFrameMatrix() {
   // Select intrinsic matrix and calibration based on camera type
   auto *s = uiState();
   bool wide_cam = active_stream_type == VISION_STREAM_WIDE_ROAD;
+  bool driver_cam = active_stream_type == VISION_STREAM_DRIVER;
+
+  // Driver camera uses simple identity transform
+  if (driver_cam) {
+    return mat4{{
+      1.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 1.0,
+    }};
+  }
+
   const auto &intrinsic_matrix = wide_cam ? ECAM_INTRINSIC_MATRIX : FCAM_INTRINSIC_MATRIX;
   const auto &calibration = wide_cam ? s->scene.view_from_wide_calib : s->scene.view_from_calib;
 
@@ -167,9 +179,23 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
       skip_frame_count = 5;
     }
 
+    // 检查是否挂倒档
+    bool is_reverse = sm["carState"].getCarState().getGearShifter() == cereal::CarState::GearShifter::REVERSE;
+    bool has_driver_cam = available_streams.count(VISION_STREAM_DRIVER);
+
+    // 更新摄像头请求状态
+    if (is_reverse && has_driver_cam) {
+      driver_cam_requested = true;
+    } else {
+      driver_cam_requested = false;
+    }
+
     // Wide or narrow cam dependent on speed
     bool has_wide_cam = available_streams.count(VISION_STREAM_WIDE_ROAD);
-    if (has_wide_cam) {
+    if (driver_cam_requested) {
+      // 倒档时显示驾驶员摄像头
+      CameraWidget::setStreamType(VISION_STREAM_DRIVER);
+    } else if (has_wide_cam) {
       float v_ego = sm["carState"].getCarState().getVEgo();
       if ((v_ego < 10) || available_streams.size() == 1) {
         wide_cam_requested = true;
@@ -178,10 +204,19 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
       }
       //wide_cam_requested = wide_cam_requested && sm["selfdriveState"].getSelfdriveState().getExperimentalMode();
       wide_cam_requested = wide_cam_requested && s->scene.carrot_experimental_mode;
+      CameraWidget::setStreamType(wide_cam_requested ? VISION_STREAM_WIDE_ROAD : VISION_STREAM_ROAD);
+    } else {
+      CameraWidget::setStreamType(VISION_STREAM_ROAD);
+    }
+
+    // 设置帧ID
+    if (driver_cam_requested) {
+      // 驾驶员摄像头使用modelV2的帧ID（因为driverCameraState可能被忽略）
+      CameraWidget::setFrameId(sm["modelV2"].getModelV2().getFrameId());
+    } else {
+      CameraWidget::setFrameId(sm["modelV2"].getModelV2().getFrameId());
     }
     painter.beginNativePainting();
-    CameraWidget::setStreamType(wide_cam_requested ? VISION_STREAM_WIDE_ROAD : VISION_STREAM_ROAD);
-    CameraWidget::setFrameId(sm["modelV2"].getModelV2().getFrameId());
     CameraWidget::paintGL();
     painter.endNativePainting();
   }
@@ -189,10 +224,13 @@ void AnnotatedCameraWidget::paintEvent(QPaintEvent *event) {
   painter.setRenderHint(QPainter::Antialiasing);
   painter.setPen(Qt::NoPen);
 
+  // 只在非驾驶员摄像头模式下绘制model
+  if (!driver_cam_requested) {
   model.draw(painter, rect());
+  }
   painter.beginNativePainting();
   try {
-      ui_draw(s, &model, width(), height());      
+      ui_draw(s, &model, width(), height());
   } catch (const std::exception &e) {
 	LOGE("ui_nvg_draw failed: %s", e.what());
     print_stack_trace();
