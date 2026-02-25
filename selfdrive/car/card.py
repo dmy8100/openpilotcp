@@ -108,7 +108,9 @@ class Car:
       self.params.put_bool("FirmwareQueryDone", True)
     else:
       self.CI, self.CP = CI, CI.CP
-      self.RI = RI
+      #self.RI = RI
+    from opendbc.car.radar_interface import RadarInterface
+    self.RI = RadarInterface(self.CI.CP)
 
     # set alternative experiences from parameters
     disengage_on_accelerator = self.params.get_bool("DisengageOnAccelerator")
@@ -309,7 +311,7 @@ class Car:
     finally:
       e.set()
       t.join()
-    
+
 def main():
   #config_realtime_process(4, Priority.CTRL_HIGH)
   config_realtime_process(6, Priority.CTRL_HIGH)
