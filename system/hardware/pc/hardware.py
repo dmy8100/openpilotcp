@@ -96,7 +96,7 @@ class Pc(HardwareBase):
 
 
     # 尝试从 hwmon 设备读取温度数据
-    hwmon_thermal_paths = glob.glob('/sys/class/hwmon/hwmon3/temp1_input')
+    hwmon_thermal_paths = glob.glob('/sys/class/hwmon/hwmon0/temp1_input')
     for path in hwmon_thermal_paths:
         try:
             with open(path) as f:
