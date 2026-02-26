@@ -407,16 +407,22 @@ void execAndReboot(const std::string& cmd) {
     Params().putBool("DoReboot", true);
 }
 
+//删除校准参数并退出软件
+void execAndExitApp(const std::string& cmd) {
+    system(cmd.c_str());
+    qApp->quit();
+}
+
 void DevicePanel::calibration() {
   if (!uiState()->engaged()) {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration?"), tr("ReCalibration"), this)) {
       if (!uiState()->engaged()) {
-        std::thread worker(execAndReboot, "rm -f /home/my/.comma/params/d/CalibrationParams");
+        std::thread worker(execAndExitApp, "rm -f /home/my/.comma/params/d/CalibrationParams");
         worker.detach();
       }
     }
   } else {
-    ConfirmationDialog::alert(tr("Reboot & Disengage to Calibration"), this);
+    ConfirmationDialog::alert(tr("Disengage to ReCalibration"), this);
   }
 }
 

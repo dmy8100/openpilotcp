@@ -1049,11 +1049,11 @@
         <translation>보기</translation>
     </message>
     <message>
-        <source>Reboot &amp; Disengage to Calibration</source>
+        <source>Git pull &amp; Reboot?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Git pull &amp; Reboot?</source>
+        <source>Disengage to ReCalibration</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1100,7 +1100,11 @@
     </message>
     <message>
         <source>Reboot &amp; Disengage to Calibration</source>
-        <translation>请重启并取消openpilot以进行校准</translation>
+        <translation type="vanished">请重启并取消openpilot以进行校准</translation>
+    </message>
+    <message>
+        <source>Disengage to ReCalibration</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

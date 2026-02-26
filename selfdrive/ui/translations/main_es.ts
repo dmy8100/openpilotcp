@@ -1061,7 +1061,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reboot &amp; Disengage to Calibration</source>
+        <source>Disengage to ReCalibration</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
