@@ -417,7 +417,11 @@ void DevicePanel::calibration() {
   if (!uiState()->engaged()) {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration?"), tr("ReCalibration"), this)) {
       if (!uiState()->engaged()) {
-        std::thread worker(execAndExitApp, "rm -f /home/my/.comma/params/d/CalibrationParams");
+        std::thread worker(execAndExitApp, "rm -f /home/my/.comma/params/d/CalibrationParams "
+                                               "/home/my/.comma/params/d/LiveParameters "
+                                               "/home/my/.comma/params/d/LiveParametersV2 "
+                                               "/home/my/.comma/params/d/LiveTorqueParameters "
+                                               "/home/my/.comma/params/d/LiveDelay");
         worker.detach();
       }
     }

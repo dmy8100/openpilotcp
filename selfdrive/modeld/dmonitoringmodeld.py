@@ -58,7 +58,7 @@ class ModelState:
       if 'input_img' not in self.tensor_inputs:
         self.tensor_inputs['input_img'] = qcom_tensor_from_opencl_address(input_img_cl.mem_address, self.input_shapes['input_img'], dtype=dtypes.uint8)
     else:
-      self.tensor_inputs['input_img'] = Tensor(self.frame.buffer_from_cl(input_img_cl).reshape(self.input_shapes['input_img']), dtype=dtypes.uint8).realize()
+      self.tensor_inputs['input_img'] = Tensor(self.frame.buffer_from_cl(input_img_cl).reshape(self.input_shapes['input_img']), dtype=dtypes.uint8, device='CL').realize()
 
 
     output = self.model_run(**self.tensor_inputs).contiguous().realize().uop.base.buffer.numpy()

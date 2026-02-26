@@ -204,7 +204,7 @@ class ModelState:
     else:
       for key in imgs_cl:
         frame_input = self.frames[key].buffer_from_cl(imgs_cl[key]).reshape(self.vision_input_shapes[key])
-        self.vision_inputs[key] = Tensor(frame_input, dtype=dtypes.uint8).realize()
+        self.vision_inputs[key] = Tensor(frame_input, dtype=dtypes.uint8, device='CL').realize()
 
     if prepare_only:
       return None
