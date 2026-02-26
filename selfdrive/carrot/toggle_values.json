@@ -75,7 +75,7 @@
   "ShowPathColor": "13",
   "EnableSpeedTF": "0",
   "AutoGasTokSpeed": "30",
-  "AutoCurveSpeedLowerLimit": "30",
+  "AutoCurveSpeedLowerLimit": "10",
   "UseLaneLineSpeed": "65",
   "AutoCurveSpeedFactor": "280",
   "AutoNaviSpeedBumpSpeed": "35",
