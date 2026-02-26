@@ -11,7 +11,7 @@ class LatControl(ABC):
     self.sat_count_rate = 1.0 * DT_CTRL
     self.sat_limit = CP.steerLimitTimer
     self.sat_count = 0.
-    self.sat_check_min_speed = 10.
+    self.sat_check_min_speed = 5. / 3.6
 
     # we define the steer torque scale as [-1.0...1.0]
     self.steer_max = 1.0
