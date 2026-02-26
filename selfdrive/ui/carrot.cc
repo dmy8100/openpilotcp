@@ -903,8 +903,8 @@ protected:
         right_lane_line = sm["carState"].getCarState().getRightLaneLine();
         for (int i = 0; i < std::size(lane_line_vertices); i++) {
             lane_line_probs[i] = model_lane_line_probs[i];
-            float line_width = 0.025;
-            if (i == 1 && left_lane_line >= 20) line_width = 0.05;
+            float line_width = 0.05;
+            if (i == 1 && left_lane_line >= 20) line_width = 0.1;
             update_line_data(s, model_lane_lines[i], line_width, 0.0, 0.0, &lane_line_vertices[i], max_idx);
             if (i == 1) {
               update_line_data(s, model_lane_lines[i], line_width, 0.0, 0.0, &lane_line_vertices_for_double, max_idx, true, -0.3);
@@ -943,11 +943,11 @@ public:
           int alpha = (lane_line_probs[i] > 0.3) ? 220 : 0;
           int stroke = 0.0;
           if (i == 1) {
-            color = (left_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
+            color = (left_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_GREEN_ALPHA(alpha);
             stroke = (left_lane_line >= 20) ? 1.0 : 0.0;
           }
-          else if (i == 2) color = (right_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_WHITE_ALPHA(alpha);
-          else color = COLOR_WHITE_ALPHA(alpha);
+          else if (i == 2) color = (right_lane_line >= 20) ? COLOR_YELLOW_ALPHA(alpha) : COLOR_GREEN_ALPHA(alpha);
+          else color = COLOR_GREEN_ALPHA(alpha);
           ui_draw_line(s, lane_line_vertices[i], &color, nullptr, stroke);
           if ((i == 1) && (left_lane_line%10 == 4)) {
             ui_draw_line(s, lane_line_vertices_for_double, &color, nullptr, stroke);
