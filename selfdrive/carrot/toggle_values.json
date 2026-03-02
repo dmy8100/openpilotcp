@@ -77,7 +77,7 @@
   "AutoGasTokSpeed": "0",
   "AutoCurveSpeedLowerLimit": "10",
   "UseLaneLineSpeed": "65",
-  "AutoCurveSpeedFactor": "220",
+  "AutoCurveSpeedFactor": "180",
   "AutoNaviSpeedBumpSpeed": "35",
   "AutoCurveSpeedAggressiveness": "100",
   "CustomSteerDeltaUpLC": "0",
