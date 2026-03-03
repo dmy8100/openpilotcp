@@ -2117,17 +2117,24 @@ public:
         const auto lane_lines = model.getLaneLines();
         int wStr = 40;
 
+        // 收集所有雷达跟踪目标信息
+        struct RadarTarget {
+          float x, y, ax, ay, dRel;
+          float v, v_lat, y_rel, v_abs, v_sum;
+          bool radar;
+          float model_prob;
+        };
+        std::vector<RadarTarget> targets;
+
         for (auto const& rs : { radar_state.getLeadsLeft(), radar_state.getLeadsRight(), radar_state.getLeadsCenter() }) {
           for (auto const& l : rs) {
             QPointF side, a_side;
             float x, y, z, ax, ay;
             float v, v_lat, y_rel;
-            float t = radar_lat_factor;   // 예측 시간
+            float t = radar_lat_factor;
             float model_prob = 0.0f;
-            //float score = 0.0f;
             float dRel = l.getDRel();
 
-            // 현재점 투영
             z = lane_lines[2].getZ()[get_path_length_idx(lane_lines[2], l.getDRel())] - 0.61f;
             if (dRel > 2.5 && _model->mapToScreen(dRel, -l.getYRel(), z, &side)) {
               x = side.x();
@@ -2139,54 +2146,102 @@ public:
 
               bool radar = l.getRadar();
               model_prob = l.getModelProb();
-              //score = l.getScore();
 
-              // 속도 크기/표시값 (v_ego 없이 간단 처리)
               float v_abs = std::sqrt(v * v + v_lat * v_lat);
               float v_sum = (v >= 0.f) ? v_abs : -v_abs;
 
               if (v_abs > 3.0f) {
-                // 미래점(월드) 계산
                 float a_dRel = dRel + v * t;
                 if (a_dRel < 2.0f) a_dRel = 2.0f;
                 float a_yRel = y_rel + v_lat * t;
 
-                // 미래점 투영 (y는 기존과 동일하게 부호 반전)
-                if (std::fabs(v) > 3.0f && _model->mapToScreen(a_dRel, -a_yRel, z, &a_side)) {  // (필요시 z를 a_dRel로 재계산 권장)
+                ax = ay = 0.0f;
+                if (std::fabs(v) > 3.0f && _model->mapToScreen(a_dRel, -a_yRel, z, &a_side)) {
                   ax = a_side.x();
                   ay = a_side.y();
-
-                  QPolygonF vertext;
-                  vertext.push_back(side);
-                  vertext.push_back(a_side);
-                  ui_draw_line(s, vertext, nullptr, nullptr, 3.0, (v_sum > 0.f)? COLOR_GREEN: COLOR_RED);
-                  nvgBeginPath(s->vg);
-                  nvgCircle(s->vg, ax, ay, 10);
-                  nvgFillColor(s->vg, (v_sum > 0.f) ? COLOR_GREEN : COLOR_RED);
-                  nvgFill(s->vg);
                 }
 
-                // 속도 텍스트/박스
-                sprintf(str, "%.0f", (s->scene.is_metric) ? v_sum * MS_TO_KPH : v_sum * MS_TO_MPH);
-                wStr = 35 * (int)strlen(str);
-                ui_fill_rect(s->vg,
-                  { (int)(x - wStr / 2), (int)(y - 35), wStr, 42 },
-                  (!radar) ? COLOR_BLUE : (model_prob == 0.01f) ? COLOR_GREEN : (v_sum > 0.f) ? COLOR_ORANGE : COLOR_RED,
-                  15);
-                ui_draw_text(s, x, y, str, 40, COLOR_WHITE, BOLD);
-
-                if (show_radar_info >= 2) {
-                  sprintf(str, "%.1f", y_rel);
-                  ui_draw_text(s, x, y - 40, str, 30, COLOR_WHITE, BOLD);
-
-                  sprintf(str, "%.1f", (s->scene.is_metric)? dRel : dRel * KM_TO_MILE);
-                  ui_draw_text(s, x, y + 30, str, 30, COLOR_WHITE, BOLD);
-                }
+                targets.push_back({x, y, ax, ay, dRel, v, v_lat, y_rel, v_abs, v_sum, radar, model_prob});
               }
-              else if (show_radar_info >= 3) {
-                strcpy(str, "*");
-                ui_draw_text(s, x, y, str, 40, COLOR_WHITE, BOLD);
-              }
+            }
+          }
+        }
+
+        // 按距离排序（近的优先绘制）
+        std::sort(targets.begin(), targets.end(), [](const RadarTarget& a, const RadarTarget& b) {
+          return a.dRel < b.dRel;
+        });
+
+        // 检测重合并过滤（近处优先）
+        struct BoundingBox {
+          float x, y, width, height;
+        };
+        std::vector<BoundingBox> drawn_boxes;
+        const float text_box_height = 42.0f;
+        const float text_box_margin = 50.0f;  // 增大间隔到50像素
+
+        auto is_overlapping = [&drawn_boxes, text_box_height, text_box_margin](float x, float y, float width) -> bool {
+          BoundingBox box{x, y, width, text_box_height};
+          for (const auto& drawn : drawn_boxes) {
+            float overlap_x = std::max(0.0f, std::min(box.x + box.width / 2, drawn.x + drawn.width / 2) - std::max(box.x - box.width / 2, drawn.x - drawn.width / 2));
+            float overlap_y = std::max(0.0f, std::min(box.y + box.height / 2, drawn.y + drawn.height / 2) - std::max(box.y - box.height / 2, drawn.y - drawn.height / 2));
+            if (overlap_x > text_box_margin && overlap_y > text_box_margin) {
+              return true;
+            }
+          }
+          return false;
+        };
+
+        for (const auto& target : targets) {
+          float x = target.x;
+          float y = target.y;
+          float ax = target.ax;
+          float ay = target.ay;
+          float v_sum = target.v_sum;
+          float dRel = target.dRel;
+          float y_rel = target.y_rel;
+
+          // 速度文本框检测重合
+          sprintf(str, "%.0f", (s->scene.is_metric) ? v_sum * MS_TO_KPH : v_sum * MS_TO_MPH);
+          wStr = 35 * (int)strlen(str);
+
+          // 检测速度文本框是否与已绘制的重合
+          if (!is_overlapping(x, y - 35 / 2, wStr)) {
+            // 绘制预测线和圆点（与速度文本框一起绘制，如果重合则都不绘制）
+            if (std::fabs(target.v) > 3.0f && ax != 0.0f && ay != 0.0f) {
+              QPolygonF vertext;
+              vertext.push_back(QPointF(x, y));
+              vertext.push_back(QPointF(ax, ay));
+              ui_draw_line(s, vertext, nullptr, nullptr, 3.0, (v_sum > 0.f)? COLOR_GREEN: COLOR_RED);
+              nvgBeginPath(s->vg);
+              nvgCircle(s->vg, ax, ay, 10);
+              nvgFillColor(s->vg, (v_sum > 0.f) ? COLOR_GREEN : COLOR_RED);
+              nvgFill(s->vg);
+            }
+
+            // 绘制速度文本框
+            ui_fill_rect(s->vg,
+              { (int)(x - wStr / 2), (int)(y - 35), wStr, 42 },
+              (!target.radar) ? COLOR_BLUE : (target.model_prob == 0.01f) ? COLOR_GREEN : (v_sum > 0.f) ? COLOR_ORANGE : COLOR_RED,
+              15);
+            ui_draw_text(s, x, y, str, 40, COLOR_WHITE, BOLD);
+
+            // 记录已绘制的框
+            drawn_boxes.push_back({x, (float)(y - 35 / 2), (float)wStr, text_box_height});
+          }
+
+          // 额外信息检测重合（如果需要显示）
+          if (show_radar_info >= 2) {
+            // y_rel 信息
+            sprintf(str, "%.1f", y_rel);
+            if (!is_overlapping(x, y - 40, 35)) {
+              ui_draw_text(s, x, y - 40, str, 30, COLOR_WHITE, BOLD);
+            }
+
+            // 距离信息
+            sprintf(str, "%.1f", (s->scene.is_metric)? dRel : dRel * KM_TO_MILE);
+            if (!is_overlapping(x, y + 30, 35)) {
+              ui_draw_text(s, x, y + 30, str, 30, COLOR_WHITE, BOLD);
             }
           }
         }

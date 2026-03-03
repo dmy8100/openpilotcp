@@ -35,7 +35,7 @@
   "AutoEngage": "0",
   "CompletedTrainingVersion": "0.2.0",
   "AutoTurnControlTurnEnd": "6",
-  "ShowDeviceState": "0",
+  "ShowDeviceState": "1",
   "TFollowGap2": "120",
   "MyDrivingModeAuto": "0",
   "LfaButtonMode": "0",
