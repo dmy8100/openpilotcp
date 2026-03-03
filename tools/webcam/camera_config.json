@@ -6,7 +6,7 @@
   "cameras": [
     {
       "name": "roadCameraState",
-      "device": "/dev/v4l/by-path/pci-0000:04:00.3-usb-0:1.3:1.0-video-index0",
+      "device": "/dev/v4l/by-path/pci-0000:04:00.3-usb-0:1.1:1.0-video-index0",
       "enabled": true,
       "width": 1920,
       "height": 1080,
@@ -45,7 +45,7 @@
     {
       "name": "wideRoadCameraState",
       "device": "/dev/v4l/by-path/pci-0000:04:00.3-usb-0:1.3:1.0-video-index0",
-      "enabled": false,
+      "enabled": true,
       "width": 1920,
       "height": 1080,
       "fps": 20,
@@ -56,10 +56,12 @@
         "exposure_min": 2,
         "exposure_max": 500,
         "target_brightness": 100,
-        "pid_kp": 1.5,
-        "pid_ki": 0.01,
-        "pid_kd": 0.1,
-        "adjust_interval_ms": 30
+        "target_brightness_day": 120,
+        "target_brightness_night": 100,
+        "pid_kp": 0.5,
+        "pid_ki": 0.3,
+        "pid_kd": 0.01,
+        "adjust_interval_ms": 50
       },
       "gamma_control": {
         "enabled": true,
@@ -69,9 +71,9 @@
         "gamma_step": 20
       },
       "roi_config": {
-        "y_top_pct": 0.5,
-        "y_mid_pct": 0.75,
-        "y_bottom_pct": 0.95,
+        "y_top_pct": 0.05,
+        "y_mid_pct": 0.35,
+        "y_bottom_pct": 0.8,
         "left_top_pct": 0.3,
         "right_top_pct": 0.7,
         "left_mid_pct": 0.2,
