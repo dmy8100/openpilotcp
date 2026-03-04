@@ -34,10 +34,10 @@
       },
       "roi_config": {
         "y_top_pct": 0.05,
-        "y_mid_pct": 0.35,
-        "y_bottom_pct": 0.8,
-        "left_top_pct": 0.3,
-        "right_top_pct": 0.7,
+        "y_mid_pct": 0.4,
+        "y_bottom_pct": 0.9,
+        "left_top_pct": 0.1,
+        "right_top_pct": 0.9,
         "left_mid_pct": 0.2,
         "right_mid_pct": 0.8
       }

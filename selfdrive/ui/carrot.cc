@@ -2123,10 +2123,13 @@ public:
           float v, v_lat, y_rel, v_abs, v_sum;
           bool radar;
           float model_prob;
+          int lane_priority;  // 0: 中间车道(最高优先), 1: 左车道, 2: 右车道
         };
         std::vector<RadarTarget> targets;
 
-        for (auto const& rs : { radar_state.getLeadsLeft(), radar_state.getLeadsRight(), radar_state.getLeadsCenter() }) {
+        int lane_idx = 0;
+        // 按优先级顺序处理车道：中间 → 左 → 右
+        for (auto const& rs : { radar_state.getLeadsCenter(), radar_state.getLeadsLeft(), radar_state.getLeadsRight() }) {
           for (auto const& l : rs) {
             QPointF side, a_side;
             float x, y, z, ax, ay;
@@ -2161,15 +2164,19 @@ public:
                   ay = a_side.y();
                 }
 
-                targets.push_back({x, y, ax, ay, dRel, v, v_lat, y_rel, v_abs, v_sum, radar, model_prob});
+                targets.push_back({x, y, ax, ay, dRel, v, v_lat, y_rel, v_abs, v_sum, radar, model_prob, lane_idx});
               }
             }
           }
+          lane_idx++;
         }
 
-        // 按距离排序（近的优先绘制）
+        // 排序：优先车道优先级，相同车道内按距离排序（近的优先）
         std::sort(targets.begin(), targets.end(), [](const RadarTarget& a, const RadarTarget& b) {
-          return a.dRel < b.dRel;
+          if (a.lane_priority != b.lane_priority) {
+            return a.lane_priority < b.lane_priority;  // 车道优先级：0 > 1 > 2
+          }
+          return a.dRel < b.dRel;  // 相同车道按距离排序
         });
 
         // 检测重合并过滤（近处优先）
@@ -2178,14 +2185,21 @@ public:
         };
         std::vector<BoundingBox> drawn_boxes;
         const float text_box_height = 42.0f;
-        const float text_box_margin = 50.0f;  // 增大间隔到50像素
+        const float text_box_margin = 50.0f;  // 最小间距50像素
 
         auto is_overlapping = [&drawn_boxes, text_box_height, text_box_margin](float x, float y, float width) -> bool {
           BoundingBox box{x, y, width, text_box_height};
           for (const auto& drawn : drawn_boxes) {
-            float overlap_x = std::max(0.0f, std::min(box.x + box.width / 2, drawn.x + drawn.width / 2) - std::max(box.x - box.width / 2, drawn.x - drawn.width / 2));
-            float overlap_y = std::max(0.0f, std::min(box.y + box.height / 2, drawn.y + drawn.height / 2) - std::max(box.y - box.height / 2, drawn.y - drawn.height / 2));
-            if (overlap_x > text_box_margin && overlap_y > text_box_margin) {
+            // 计算两个框中心之间的距离
+            float center_dist_x = std::abs(box.x - drawn.x);
+            float center_dist_y = std::abs(box.y - drawn.y);
+
+            // 考虑框的宽度和高度，计算最小需要的距离
+            float min_dist_x = (box.width / 2 + drawn.width / 2 + text_box_margin);
+            float min_dist_y = (box.height / 2 + drawn.height / 2 + text_box_margin);
+
+            // 如果中心距离小于最小需要距离，则认为重合
+            if (center_dist_x < min_dist_x && center_dist_y < min_dist_y) {
               return true;
             }
           }
