@@ -5,7 +5,7 @@ void setMainWindow(QWidget *w) {
   //const QSize sz = QGuiApplication::primaryScreen()->size();
 
   if (Hardware::PC()) {
-    const QSize DEFAULT_WINDOW_SIZE(1790, 1000);
+    const QSize DEFAULT_WINDOW_SIZE(1790, 1039);
     w->setMinimumSize(QSize(640, 480));
     w->setMaximumSize(DEVICE_SCREEN_SIZE);
     w->resize(DEFAULT_WINDOW_SIZE); // 设置初始大小
