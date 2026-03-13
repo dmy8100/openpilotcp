@@ -13,33 +13,23 @@
       "fps": 20,
       "record_path": "/home/my/videos/road/",
       "file_prefix": "road_",
-      "exposure_control": {
-        "enabled": true,
-        "exposure_min": 2,
-        "exposure_max": 500,
-        "target_brightness": 100,
-        "target_brightness_day": 120,
-        "target_brightness_night": 100,
-        "pid_kp": 0.15,
-        "pid_ki": 0.05,
-        "pid_kd": 0.001,
-        "adjust_interval_ms": 50
-      },
       "gamma_control": {
         "enabled": true,
         "gamma_min": 100,
         "gamma_max": 500,
         "gamma_default": 300,
-        "gamma_step": 20
+        "gamma_step": 25,
+        "target_brightness": 100,
+        "dead_zone": 5
       },
       "roi_config": {
         "y_top_pct": 0.05,
         "y_mid_pct": 0.4,
         "y_bottom_pct": 0.9,
-        "left_top_pct": 0.,
+        "left_top_pct": 0.1,
         "right_top_pct": 0.9,
-        "left_mid_pct": 0.3,
-        "right_mid_pct": 0.7
+        "left_mid_pct": 0.2,
+        "right_mid_pct": 0.8
       }
     },
     {
@@ -51,33 +41,21 @@
       "fps": 20,
       "record_path": "/home/my/videos/wide/",
       "file_prefix": "wide_",
-      "exposure_control": {
-        "enabled": true,
-        "exposure_min": 2,
-        "exposure_max": 500,
-        "target_brightness": 100,
-        "target_brightness_day": 120,
-        "target_brightness_night": 100,
-        "pid_kp": 0.5,
-        "pid_ki": 0.3,
-        "pid_kd": 0.01,
-        "adjust_interval_ms": 50
-      },
       "gamma_control": {
         "enabled": true,
         "gamma_min": 100,
         "gamma_max": 500,
         "gamma_default": 300,
-        "gamma_step": 20
+        "gamma_step": 15
       },
       "roi_config": {
         "y_top_pct": 0.05,
         "y_mid_pct": 0.35,
         "y_bottom_pct": 0.8,
-        "left_top_pct": 0.1,
-        "right_top_pct": 0.9,
-        "left_mid_pct": 0.35,
-        "right_mid_pct": 0.65
+        "left_top_pct": 0.3,
+        "right_top_pct": 0.7,
+        "left_mid_pct": 0.2,
+        "right_mid_pct": 0.8
       }
     },
     {
